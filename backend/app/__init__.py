@@ -37,11 +37,8 @@ def createapp():
     # sends these headers after every request to web-app; extra layer of security
     @app.after_request
     def add_security_headers(response):
-         response.headers["Content-Security-Policy"] = """
-            default-src 'self';
-            connect-src 'self' http://localhost:5000; 
-            script-src 'self';
-        """
+        response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000; script-src 'self'"
+        return response
 
     # limiter sets a default limit for each page in web-app; prevents bruteforce attacks   
     limiter = Limiter(
