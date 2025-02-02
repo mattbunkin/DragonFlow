@@ -1,10 +1,10 @@
 from app import db
 from flask_login import UserMixin
-from marshmallow import Schema, validate
+from marshmallow import Schema, fields, validate
 from marshmallow_sqlalchemy import SQLAlchemySchema
 
 """
-    Users Table
+    Users Table 
         - Core authentication and user management system
             • Email, password, user ID, and essential personal information
             • Session tokens and login status tracking
@@ -43,7 +43,6 @@ from marshmallow_sqlalchemy import SQLAlchemySchema
             • Career planning materials
 """
 
-# store sensitive student user info
 class User(db.Model, UserMixin):
     __tablename__ = "user"
     pid = db.Column(db.Integer, primary_key=True)
@@ -62,29 +61,91 @@ class User(db.Model, UserMixin):
     gpa = db.Column(db.Float, nullable=False)
 
     # add easy refrencing by establishing relationships to other tables
+    user_prefrence = db.relationship("UserPreferences", backref="student_user", lazy=True)
+    user_program = db.relationship("UserProgram", backref="student_user", lazy=True)
+    user_term_plan = db.relationship("UserTermPlanning", backref="student_user", lazy=True)
+    user_refresh_token = db.relationship("RefreshTokens", backref="student_user", lazy=True)
 
-
+"""
+All tables have their foreign key refrence the User primary key:
+    This is for: easy usability between tables and to establishing database relationships
+    all going back to the student user; all inherit UserMixin for proper auth
+"""
 # store student preferences for website features
 class UserPreferences(db.Model, UserMixin):
     __tablename__ = "user_preferences"  
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    student_pid = db.Columnn(db.Integer, db.ForeignKey(User.pid), nullable=False)
 
 # store major/program type: major requirements, pre-reqs, course code etc.
 class UserProgram(db.Model, UserMixin):
     __tablename__ = "user_program"
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    student_pid = db.Columnn(db.Integer, db.ForeignKey(User.pid), nullable=False)
+
 
 # our own proper course catalogue to refer to after scraping
 class Courses(db.Model, UserMixin):
     __tablename__ = "courses"
-    pass
+    id = db.Column(db.Integer, primary_key=True)
 
-# the user's specfic term planning for their next term
+
+# the user's specfic term planning for their next term; must consider CO-OP 
 class UserTermPlanning(db.Model, UserMixin):
     __tablename__ = "user_term_planning"
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    student_pid = db.Columnn(db.Integer, db.ForeignKey(User.pid), nullable=False)
 
 # refresh tokens; will use for auth 
 class RefreshTokens(db.Model, UserMixin):
     __tablename__ = "refresh_tokens"
-    pass
+    id = db.Column(db.Integer, primary_key=True)
+    student_pid = db.Columnn(db.Integer, db.ForeignKey(User.pid), nullable=False)
+
+
+
+"""
+Use marshmallow's SQLAlchemySchema and validate for
+database validation: 
+    - prevents SQL injections and is more explicit with preventing
+    certain inputs
+    - all about data validation and transformation
+"""
+
+# Marshmallow input validation Example
+class UserSchmea(SQLAlchemySchema):
+    class Meta:
+        model = User
+    pid = fields.Int(dump_only=True) # read-only; can't change
+
+    # Use RegExp to limit user input and length for min/max length
+    username = fields.Str(validate=[
+        validate.Length(min=3, max=40),
+        validate.Regexp("^[a-zA-Z0-9_]+$", 
+        error="Username must only contain letters, numbers, underscores")
+    ])
+
+    # drexel emails CANNOT be long or too short
+    email = fields.Str(validate=[
+        validate.Length(min=5, max=30, error="Invalid Drexel Email"),
+        validate.Email(error="Not valid email address")
+    ])
+
+    # stricter limits because its a password input
+    hashed_password = fields.Str(validate=[
+        validate.Length(min=10, max=80, error="Password must be minimum of 8 characters"),
+        validate.Regexp(
+             "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$",
+            error="Password must contain at least one letter, one number, and one special character"
+        ),
+    ])
+
+    # to commit to database must follow this format
+    enrollment_date = fields.Date(format="%Y-%m-%d")
+    graduation_date = fields.Date(format="%Y-%m-%d")
+
+    # can be changed throughout
+    undergrad = fields.Bool()
+    gpa = fields.Float()
+
+
