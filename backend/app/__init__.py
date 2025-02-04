@@ -56,7 +56,7 @@ def createapp():
 
 
 
-    # REGISTR ALL BLUEPRINTS HERE; use core as an example
+    # REGISTER ALL BLUEPRINTS HERE; use core as an example
     app.register_blueprint(core, url_prefix="/")
 
 
