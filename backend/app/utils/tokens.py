@@ -7,11 +7,14 @@ from app.models import RefreshTokens
 from app import db
 
 """
-When working within the routes.py files the return types specify
-    True/False: tells us the querying/operations worked
-    but token was flawed (invalid, expired etc). 
+When working within the routes.py files the routes need a way of knowing whether 
+some operation on a token is successful; this is why we return boolean types
+for all functions in tokens.py, it allows us to use if/elif statements
+when checking if functions ran successfully.
 
-    Exceptions/e: tells us we couldn't even query without an error.
+    True: Querying and specific token function worked perfectly
+    False: Querying worked, but token could be expired, invalid or flawed.
+    None: Only for generating tokens function; None tells us we couldn't generate tokens.
 """
 
 # remember generating tokens from jwt-extended returns dictionaries
@@ -71,7 +74,7 @@ def revoke_refresh_token(user_id) -> True | Exception:
 
     except Exception as e:
         db.session.rollback()
-        return e
+        return False
 
 
 # tells us whether the token is valid; uses exceptions to tell us about token's validity in database 
@@ -93,7 +96,7 @@ def check_refresh_token(user_id: int) -> bool | Exception:
     # if we couldn't even query the token 
     except Exception as e:
         db.session.rollback()
-        return e
+        return False
 
 # can use this function to clear the cache of tokens; True if operation complete
 def clear_refresh_token(user_id: int) -> True | Exception:
@@ -108,4 +111,4 @@ def clear_refresh_token(user_id: int) -> True | Exception:
     # return error if couldn't find token or error occurred 
     except Exception as e:
         db.session.rollback()
-        return e
+        return False
