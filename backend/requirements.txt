@@ -43,5 +43,5 @@ wrapt==1.17.2
 
 # IF You're working on backend do (MIGHT BE DIF IF  ON WINDOWS):
 # python -m venv venv (make sure you're in backend directory)
-# source venv/bin/activate (activates virutal env)
+# source venv/bin/activate (activates virtual env)
 # pip install -r requirements.txt (installs all packages here)

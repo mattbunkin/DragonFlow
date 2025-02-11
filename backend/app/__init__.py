@@ -5,8 +5,11 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from app.config import Config
 from flask_limiter import Limiter
+from flask_jwt_extended import JWTManager
+from datetime import timedelta
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
+from utils import tokens
 import os
 
 # load env variables
@@ -34,12 +37,23 @@ def createapp():
     app.config.from_object(Config) 
     db.init_app(app) 
 
+    # allows for jwt-extended to automatically verify by token signature
+    app.config["JWT_SECRET_KEY"] = JWT_SECRET
+    # extended config keys provided by flask; allows for jwt-extended to take advantage of key features.
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
+    app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+    app.config["JWT_TOKEN_LOCATION"] = ["headers"] # look for token in headers
+    app.config["JWT_HEADER_NAME"] = "Authorization" # look for header in auth
+    app.config["JWT_HEADER_TYPE"] = "Bearer" # bearer is the prefix before actual token
+    
+    jwt = JWTManager(app)
+
     # sends these headers after every request to web-app; extra layer of security
     @app.after_request
     def add_security_headers(response):
         response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000; script-src 'self'"
         return response
-
+    
     # limiter sets a default limit for each page in web-app; prevents bruteforce attacks   
     limiter = Limiter(
          get_remote_address,
@@ -55,10 +69,8 @@ def createapp():
     from app.core.routes import core
 
 
-
     # REGISTER ALL BLUEPRINTS HERE; use core as an example
     app.register_blueprint(core, url_prefix="/")
-
 
 
     # creates migration directory; ignore as its for database development

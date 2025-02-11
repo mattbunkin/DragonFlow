@@ -9,6 +9,9 @@ To make it easy for you to get started with GitLab, here's a list of recommended
 cd existing_repo
 git add . 
 git commit -m "send message"
+
+# if there are unsaved changes from other members commits..
+git pull origin main
 git push origin main
 ```
 
@@ -40,7 +43,7 @@ DragonFlow is a comprehensive student success planner designed specifically for 
 - 💾 Database: SQLAlchemy ORM
 - 🔐 Authentication: Flask-Login
 - ✅ Schema Validation: Marshmallow
-- 💻 Frontend: Svelte5, TypeScript
+- 💻 Frontend: Svelte5, TypeScript, MeltUI
 - 
 
 
@@ -70,8 +73,16 @@ git clone https://gitlab.cci.drexel.edu/cid/2425/ws1023/60/12/drgaonflow-ci102.g
     # copy and paste to interpreter path
 ```
 
-3. Install Front-End dependencies (coming soon)
+3. Install Front-End dependencies (MUST HAVE NPM INSTALLED)
 ```bash
+    cd [your-git-lab-repo]
+    # Navigate to svelte-kit to install dependencies 
+    cd .svelte-kit
+    npm install
+
+    # once all dependencies are all installed; start dev server
+    npm run dev
+    
 # Instructions for dependency installation
 ```
 ## 👥 Contributing

@@ -77,15 +77,14 @@ class UserTermPlanning(db.Model, UserMixin):
     # empty as we wait for scraped data
 
 # refresh tokens; will use for auth 
-class RefreshTokens(db.Model, UserMixin):
+class RefreshTokens(db.Model):
     __tablename__ = "refresh_tokens"
     id = db.Column(db.Integer, primary_key=True)
     student_pid = db.Column(db.Integer, db.ForeignKey(User.pid), nullable=False)
 
-    # important token columns; authorize user
+    # important token columns; no expiration column since jwt_extended handles this
     token = db.Column(db.String(255), nullable=False, unique=True)
     created_at = db.Column(db.DateTime, nullable=False)
-    expires_at = db.Column(db.DateTime, nullable=False)
     revoked = db.Column(db.Boolean, default=False)
 
 
@@ -111,7 +110,7 @@ class UserSchema(SQLAlchemySchema):
         validate.Regexp("^[a-zA-Z0-9_]+$", 
         error="Username must only contain letters, numbers, underscores")
     ])
-
+    
     # drexel emails CANNOT be long or too short
     email = fields.Str(validate=[
         validate.Length(min=5, max=30, error="Invalid Drexel Email"),
