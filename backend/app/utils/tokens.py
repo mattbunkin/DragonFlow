@@ -18,7 +18,7 @@ when checking if functions ran successfully.
 """
 
 # remember generating tokens from jwt-extended returns dictionaries
-def store_refresh_token(user_id: int, token: dict) -> bool:
+def store_refresh_token(user_id: int, token: dict) -> True | False:
     # delete any token before storting new one
     RefreshTokens.query.filter_by(user_id=user_id).delete()
 
@@ -58,7 +58,7 @@ def gen_store_tokens(user_id: int) -> dict | None:
 
 
 # tries to find token; makes it unaccessible/revoked if found
-def revoke_refresh_token(user_id) -> True | Exception:
+def revoke_refresh_token(user_id) -> True | False:
     try: 
         # if user wants to logout 
         token = RefreshTokens.query.filter_by(
@@ -78,7 +78,7 @@ def revoke_refresh_token(user_id) -> True | Exception:
 
 
 # tells us whether the token is valid; uses exceptions to tell us about token's validity in database 
-def check_refresh_token(user_id: int) -> bool | Exception:
+def check_refresh_token(user_id: int) -> True | False:
     # get current token identity / user_id with method
     try:
         token = RefreshTokens.query.filter_by(
@@ -99,7 +99,7 @@ def check_refresh_token(user_id: int) -> bool | Exception:
         return False
 
 # can use this function to clear the cache of tokens; True if operation complete
-def clear_refresh_token(user_id: int) -> True | Exception:
+def clear_refresh_token(user_id: int) -> True | False:
     try:
         token = RefreshTokens.query.filter_by(
             user_id=user_id,

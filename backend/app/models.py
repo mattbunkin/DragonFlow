@@ -106,7 +106,7 @@ class UserSchema(SQLAlchemySchema):
 
     # Use RegExp to limit user input and length for min/max length
     username = fields.Str(validate=[
-        validate.Length(min=3, max=40),
+        validate.Length(min=8, max=40),
         validate.Regexp("^[a-zA-Z0-9_]+$", 
         error="Username must only contain letters, numbers, underscores")
     ])
