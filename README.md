@@ -93,6 +93,8 @@ git clone https://gitlab.cci.drexel.edu/cid/2425/ws1023/60/12/drgaonflow-ci102.g
 
 ```bash
     npm install 
+    # if this works start dev server
+    npm run dev 
 
     # 3. If you see any TypeScript errors about missing types, run:
     npm install -D @types/node @types/cookie @types/estree @types/json-schema @types/prop-types
