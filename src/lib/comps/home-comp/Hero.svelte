@@ -5,6 +5,7 @@ import { NotebookPen } from 'lucide-svelte';
 import { FlaskConical } from 'lucide-svelte';
 import { Earth } from 'lucide-svelte';
 import { Binary } from 'lucide-svelte';
+import { goto } from '$app/navigation';
  // Scroll down to see the original Component
  import { cn } from "$lib/utils";
                 import AnimatedBeam from "$lib/components/ui/animation/AnimatedBeam.svelte";
@@ -20,6 +21,10 @@ import { Binary } from 'lucide-svelte';
                 let div7Ref;
                 let className: any = "";
                 export { className as class };
+
+function goToLogin(){
+    return goto("/login")
+}
 </script>
 
 
@@ -213,7 +218,8 @@ import { Binary } from 'lucide-svelte';
             </div>
             <button class="glow bg-gradient-to-r
                         from-cyan-400 to-sky-500 text-stone-100 text-xl
-                        font-semibold px-6 py-3 rounded-3xl mt-10 block m-auto">
+                        font-semibold px-6 py-3 rounded-3xl mt-10 block m-auto" 
+                        on:click={goToLogin}>
                     Get Started
               </button>
         </div>

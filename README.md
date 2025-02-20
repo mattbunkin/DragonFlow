@@ -85,6 +85,22 @@ git clone https://gitlab.cci.drexel.edu/cid/2425/ws1023/60/12/drgaonflow-ci102.g
     
 # Instructions for dependency installation
 ```
+
+3.5 Before pulling big changes:
+    • Make sure you have Node.js v18+ installed
+    • After pulling (make sure your inside repo directory), run:
+```bash
+    npm install 
+
+    # 3. If you see any TypeScript errors about missing types, run:
+    npm install -D @types/node @types/cookie @types/estree @types/json-schema @types/prop-types
+
+    # 4. If you're having trouble with component imports run
+    npx svelte-kit sync
+
+    # 5. Finally development server should work
+    npm run dev
+```
 ## 👥 Contributing
 This project is part of CI102. Contributors:
 Matt Bunkin, Soumil Patel, Rikhil Amonkar, Andrey Barriga

@@ -14,7 +14,7 @@
 
     <div class="card flex flex-col gap-2 max-w-[700px] max-h-[750px] shadow-lg py-7 px-5">
 
-      <p class="random font-light">This will be your display username</p>
+      <p class="font-light">This will be your display username</p>
       <label class="input input-bordered flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -27,7 +27,7 @@
         <input type="text" class="grow" placeholder="Username" />
       </label>
 
-      <p>Enter your drexel email</p>
+      <p class="font-light">Enter your drexel email</p>
       <label class="input input-bordered flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -42,7 +42,7 @@
         <input type="text" class="grow" placeholder="Email" />
       </label>
 
-    <p>Password</p>
+    <p class="font-light">Password</p>
       <label class="input input-bordered flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"
