@@ -87,8 +87,11 @@ git clone https://gitlab.cci.drexel.edu/cid/2425/ws1023/60/12/drgaonflow-ci102.g
 ```
 
 3.5 Before pulling big changes:
+
     1. Make sure you have Node.js v18+ installed
+
     2. After pulling (make sure your inside repo directory), run:
+
 ```bash
     npm install 
 
