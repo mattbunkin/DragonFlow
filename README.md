@@ -76,35 +76,13 @@ git clone https://gitlab.cci.drexel.edu/cid/2425/ws1023/60/12/drgaonflow-ci102.g
 3. Install Front-End dependencies (MUST HAVE NPM INSTALLED)
 ```bash
     cd [your-git-lab-repo]
-    # Navigate to svelte-kit to install dependencies 
-    cd .svelte-kit
+    # inside this directory run this command
     npm install
 
     # once all dependencies are all installed; start dev server
     npm run dev
-    
-# Instructions for dependency installation
-```
+```    
 
-3.5 Before pulling big changes:
-
-    1. Make sure you have Node.js v18+ installed
-    2. After pulling (make sure your inside repo directory), run:
-
-```bash
-    npm install 
-    # if this works start dev server
-    npm run dev 
-
-    # 3. If you see any TypeScript errors about missing types, run:
-    npm install -D @types/node @types/cookie @types/estree @types/json-schema @types/prop-types
-
-    # 4. If you're having trouble with component imports run
-    npx svelte-kit sync
-
-    # 5. Finally development server should work
-    npm run dev
-```
 ## 👥 Contributing
 This project is part of CI102. Contributors:
 Matt Bunkin, Soumil Patel, Rikhil Amonkar, Andrey Barriga
