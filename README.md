@@ -1,7 +1,7 @@
 # 🐲 DragonFlow - CI102
 
 ## 🚀 Getting started
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+To make it easy for you to get started with production in DragonFlow, here's a list of recommended next steps.
 
 
 ## Add Your Files
@@ -43,7 +43,7 @@ DragonFlow is a comprehensive student success planner designed specifically for 
 - 💾 Database: SQLAlchemy ORM
 - 🔐 Authentication: Flask-Login
 - ✅ Schema Validation: Marshmallow
-- 💻 Frontend: Svelte5, TypeScript, MeltUI
+- 💻 Frontend: Svelte5, TypeScript, DaisyUI, ShadCn-UI
 - 
 
 
