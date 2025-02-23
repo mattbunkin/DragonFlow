@@ -43,7 +43,7 @@ DragonFlow is a comprehensive student success planner designed specifically for 
 - 💾 Database: SQLAlchemy ORM
 - 🔐 Authentication: Flask-Login
 - ✅ Schema Validation: Marshmallow
-- 💻 Frontend: Svelte5, TypeScript, DaisyUI, ShadCn-UI
+- 💻 Frontend: Svelte5, TypeScript, DaisyUI, Shadcn-UI
 - 
 
 
