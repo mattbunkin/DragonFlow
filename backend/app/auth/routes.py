@@ -30,17 +30,20 @@ def load_user(pid):
 def register():
     # try getting the form data; could go wrong
     try:
-        username = request.form.get("username")
-        password = request.form.get("password")
-        drexel_email = request.form.get("drexel_email")
+        
+        data = request.get_json()
+        
+        username =data.get("username")
+        password = data.get("password")
+        drexel_email = data.get("drexel_email")
 
         # need both these values in format: YYYY-MM-DD, will format in frontend
-        enrollment_date = date(request.form.get("enrollment_date"))
-        graduation_date = date(request.form.get("graduation_date"))
+        enrollment_date = date(data.get("enrollment_date"))
+        graduation_date = date(data.get("graduation_date"))
 
         # when making html checkbox: name='student_type',  value='undergrad'
-        undergrad = request.form.get("student_type")
-        gpa = float(request.form.get("gpa"))
+        undergrad = data.get("student_type")
+        gpa = float(data.get("gpa"))
 
     except Exception as e:
         flash(f"Please input correct info: {str(e)}")
@@ -76,8 +79,9 @@ def register():
 # Login route added token implementation; no GET ever since it's pure API communication
 @auth.route("/login", methods=["POST"])
 def login():
-    username = request.form.get("username")
-    password = request.form.get("password")
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
 
     user = User.query.filter_by(username=username).first()
 
@@ -108,6 +112,7 @@ def login():
 @jwt_required(refresh=True) # MUST have refresh not access token
 @login_required
 def logout():
+    
     # code will only run if refresh token valid
     current_user_id = get_jwt_identity() # gets user id from refresh token
     

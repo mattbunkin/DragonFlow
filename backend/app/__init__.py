@@ -67,10 +67,8 @@ def createapp():
     # IMPORT ALL BLUEPRINTS HERE
     from app.core.routes import core
 
-
     # REGISTER ALL BLUEPRINTS HERE; use core as an example
     app.register_blueprint(core, url_prefix="/")
-
 
     # creates migration directory; ignore as its for database development
     migrate = Migrate(app, db)
