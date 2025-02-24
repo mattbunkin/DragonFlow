@@ -1,5 +1,33 @@
-<script>
+<script lang="ts">
+  // bind to input tag
+  let inputData = { 
+          username: "",
+          email: "",
+          password: "",
+    }
+  let responseMessage = ""
 
+
+  // Send data to backend through async await
+  async function sendLoginData() {
+      try {
+
+        const response = await fetch("http://127.0.0.1:5000/auth/login", 
+          {
+            method: "POST",
+            headers : { 
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(inputData)
+          }
+        )
+        const responseData = await response.json()
+        responseMessage = responseData.message();
+      }
+      catch(error){
+        console.error(error);
+      }
+  }
 </script>
 
 <div class="flex flex-col justify-center items-center min-h-screen">
@@ -24,7 +52,7 @@
           <path
             d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
         </svg>
-        <input type="text" class="grow" placeholder="Username" />
+        <input bind:value={inputData.username} type="text" class="grow" placeholder="Username" />
       </label>
 
       <p class="font-light">Enter your drexel email</p>
@@ -39,7 +67,7 @@
           <path
             d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
         </svg>
-        <input type="text" class="grow" placeholder="Email" />
+        <input bind:value={inputData.email} type="text" class="grow" placeholder="Email" />
       </label>
 
     <p class="font-light">Password</p>
@@ -54,7 +82,7 @@
             d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
             clip-rule="evenodd" />
         </svg>
-        <input type="password" class="grow" value="password" />
+        <input bind:value={inputData.password} type="password" class="grow"/>
       </label>
 
       <!-- Easy Redirection-->
@@ -66,13 +94,14 @@
     </p> 
 
       <!-- Submit Info -->
-        <button class="activebutton bg-zinc-950 text-stone-100 
+        <button on:click={sendLoginData} class="activebutton bg-zinc-950 text-stone-100 
             px-6 py-2 rounded-3xl mt-2 hover:bg-zinc-900">
             Login
         </button>
         
-        
-
+      <p>
+        {responseMessage}
+      </p>
     </div>
 
 </div>

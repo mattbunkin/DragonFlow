@@ -43,7 +43,7 @@ class UserPreferences(db.Model, UserMixin):
     # can be null if user doesn't want to input any type of data
     user_interests = db.Column(db.String(255), nullable=True)
     user_timing = db.Column(db.String(255), nullable=True)
-    user_goals = db.Column(db.String(255, nullable=True))
+    user_goals = db.Column(db.String(255), nullable=True)
 
 # store major/program type: major requirements, pre-reqs, course code etc.
 class UserProgram(db.Model, UserMixin):

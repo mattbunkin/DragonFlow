@@ -9,7 +9,6 @@ from flask_jwt_extended import JWTManager
 from datetime import timedelta
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
-from utils import tokens
 import os
 
 # load env variables
