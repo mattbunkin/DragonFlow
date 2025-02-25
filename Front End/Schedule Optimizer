@@ -1,0 +1,73 @@
+<script>
+  import { onMount } from "svelte";
+  import { writable } from "svelte/store";
+
+  let courses = writable([]);
+  let gpa = writable(0);
+  let preferences = writable({
+    preferredTimes: "",
+    rateMyProfessor: true,
+  });
+
+  function addCourse(name, credits, difficulty) {
+    courses.update((c) => [...c, { name, credits, difficulty }]);
+  }
+
+  function updateGPA(event) {
+    gpa.set(event.target.value);
+  }
+
+  function updatePreferences(event) {
+    preferences.update((p) => ({ ...p, preferredTimes: event.target.value }));
+  }
+</script>
+
+<style>
+  .container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+
+  input, button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  button {
+    background: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #45a049;
+  }
+</style>
+
+<div class="container">
+  <h2>Schedule Optimizer</h2>
+
+  <label>GPA:</label>
+  <input type="number" bind:value={gpa} step="0.01" min="0" max="4" on:input={updateGPA} />
+
+  <label>Preferred Time Slots:</label>
+  <input type="text" bind:value={preferences.preferredTimes} placeholder="e.g., Morning, Afternoon" on:input={updatePreferences} />
+
+  <label>Enable RateMyProfessor Data:</label>
+  <input type="checkbox" bind:checked={preferences.rateMyProfessor} />
+
+  <button on:click={() => addCourse('Sample Course', 3, 'Medium')}>Add Sample Course</button>
+
+  <div class="output"></div>
+</div>
