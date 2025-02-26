@@ -58,14 +58,14 @@ for _, course in courses_df.iterrows():
         gpa = np.clip(gpa, 0.0, 4.0)
 
         # Improved success_score formula
-        success_score = (0.5 * gpa  # GPA has a strong positive impact
+        success_score = (0.3 * gpa  # GPA has a strong positive impact
             - 0.9 * course['course_difficulty']  # Higher difficulty reduces success
             - 0.2 * course['has_prereqs']  # Prerequisites add some difficulty
             + np.random.normal(scale=0.25)  # Add some randomness
         )
 
         # Convert success_score to probability using logistic function
-        success_prob = 1 / (1 + np.exp(-40 * success_score))
+        success_prob = 1 / (1 + np.exp(-success_score))
         success_prob = np.clip(success_prob, 0, 1)  # Ensure probability is between 0 and 1
         success = 1 if success_prob > 0.5 else 0
 
@@ -94,7 +94,6 @@ y = df['success']
 
 # Split data into sizes for training and testing
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
-
 
 # Hyperparameter tuning
 best_params = {
@@ -141,8 +140,8 @@ def predict_success_probability(gpa, crn):
 
 # User input of GPA and CRN to be calculated and predicted
 try:
-    user_gpa = float(input("Enter your GPA: "))
-    user_crn = input("Enter the CRN: ")
+    user_gpa = float(input("Enter your GPA (Grade Point Average): "))
+    user_crn = input("Enter the CRN (Course Number): ")
     probability = predict_success_probability(user_gpa, user_crn)
     if isinstance(probability, float):
         print(f"Probability of success: {probability * 100:.2f}%")
@@ -150,4 +149,6 @@ try:
         print(probability)
 except ValueError:
     print("Invalid input. Please enter a valid GPA.")
+
+
 
