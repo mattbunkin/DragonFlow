@@ -53,18 +53,18 @@ def createapp():
     jwt = JWTManager(app)
 
     # sends these headers after every request to web-app; extra layer of security
-    # @app.after_request
-    # def add_security_headers(response):
-    #    # Add localhost:5173 to the connect-src directive
-    #     response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000 http://localhost:5173; script-src 'self'"
+    @app.after_request
+    def add_security_headers(response):
+       # Add localhost:5173 to the connect-src directive
+        response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000 http://localhost:5173; script-src 'self'"
         
-    #     # Add CORS headers explicitly
-    #     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
-    #     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    #     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    #     response.headers['Access-Control-Allow-Credentials'] = 'true'
+        # Add CORS headers explicitly
+        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
         
-    #     return response
+        return response
     
     # limiter sets a default limit for each page in web-app; prevents bruteforce attacks   
     limiter = Limiter(
@@ -84,6 +84,12 @@ def createapp():
     # REGISTER ALL BLUEPRINTS HERE; use core as an example
     app.register_blueprint(core, url_prefix="/")
     app.register_blueprint(auth, url_prefix="/auth")
+
+    from app.models import (
+        User, UserPreferences, UserProgram, 
+        Courses, UserTermPlanning, RefreshTokens
+    )
+
 
     # creates migration directory; ignore as its for database development
     migrate = Migrate(app, db)

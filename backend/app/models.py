@@ -11,7 +11,7 @@ class User(db.Model, UserMixin):
     drexel_email = db.Column(db.String(60) ,nullable=False)
 
     # passwords encrypted in any endpoints they're asked for
-    hashed_password = db.Column(db.String(80), nullable=False)
+    hashed_password = db.Column(db.String(255), nullable=False)
 
     # add easy referencing by establishing relationships to other tables
     user_preference = db.relationship("UserPreferences", backref="student_user", lazy=True)
