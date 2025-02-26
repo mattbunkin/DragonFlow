@@ -1,6 +1,6 @@
 from app import db
 from app.models import User  
-from utils import tokens
+from app.utils import tokens
 from datetime import date 
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash  
@@ -30,50 +30,28 @@ def load_user(pid):
 def register():
     # try getting the form data; could go wrong
     try:
-        
         data = request.get_json()
         
         username =data.get("username")
         password = data.get("password")
-        drexel_email = data.get("drexel_email")
-
-        # need both these values in format: YYYY-MM-DD, will format in frontend
-        enrollment_date = date(data.get("enrollment_date"))
-        graduation_date = date(data.get("graduation_date"))
-
-        # when making html checkbox: name='student_type',  value='undergrad'
-        undergrad = data.get("student_type")
-        gpa = float(data.get("gpa"))
+        drexel_email = data.get("email")
 
     except Exception as e:
-        flash(f"Please input correct info: {str(e)}")
         return jsonify({"msg": "invalid input form"}), 401
 
-    user = User.query.filter_by(username=username).first()
-
-    if user != None:
-        flash("User/Username already exists")
-
-    else:
-        try:
-            # create a new user object in database
-            new_user = User(
-                username=username,
-                drexel_email=drexel_email,
-                hashed_password=generate_password_hash(password),  
-                enrollment_date=enrollment_date,
-                graduation_date=graduation_date,
-                undergrad=undergrad,
-                gpa=gpa
-            )
-            db.session.add(new_user)
-            db.session.commit()
-            flash("Registration successful! Please login.", "success")
-            return jsonify({"msg": "successful registration"}), 200
-        
-        except Exception as e:
-            flash(f"Potential server error: {str(e)}")
-            return jsonify({"msg": "could not create user object"}), 500
+    try:
+        # create a new user object in database
+        new_user = User(
+            username=username,
+            drexel_email=drexel_email,
+            hashed_password=generate_password_hash(password),  
+        )
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"msg": "successful registration"}), 200
+    
+    except Exception as e:
+        return jsonify({"msg": "could not create user object"}), 500
 
 
 # Login route added token implementation; no GET ever since it's pure API communication
@@ -81,17 +59,13 @@ def register():
 def login():
     data = request.get_json()
     username = data.get("username")
+    email = data.get("email")
     password = data.get("password")
 
     user = User.query.filter_by(username=username).first()
 
-    # will return the User object if found; if not the type is 'None'
-    if user != None:
-        flash("User/Username already exists")
-
     if user and check_password_hash(user.hashed_password, password):
         login_user(user)
-        flash("Logged in successfully!", "success")
         
         # this will be sent to the frontend via dict struct: refer to tokens.py
         user_tokens = tokens.gen_store_tokens(user.pid) # crucial as will make token identity same as primary keys
@@ -103,7 +77,6 @@ def login():
             user_tokens
         ), 200
     else:
-        flash("Invalid username or password", "error")
         return jsonify({"msg": "invalid credentials"}), 401
 
 
@@ -118,7 +91,6 @@ def logout():
     
     # will logout user no matter what
     logout_user()
-    flash("Logged out successfully!", "success")
 
     # try to perform any of the functions
     try:
@@ -132,7 +104,6 @@ def logout():
         
     # bigger error; could mean querying didn't work etc.
     except Exception as e:
-        flash(f"Unexpected error in logout route: {str(e)}")
         return jsonify({"msg": "Server error during logout"}), 500
 
 

@@ -18,11 +18,18 @@
             headers : { 
               "Content-Type": "application/json"
             },
+            // cookies
+            credentials: "include", 
             body: JSON.stringify(inputData)
           }
         )
-        const responseData = await response.json()
-        responseMessage = responseData.message();
+        if (!response.ok) {
+          throw new Error(`HTTP error. Status:${response.status}`);
+        }
+
+        const responseData = await response.json();
+        responseMessage = responseData.msg || "Login successful"; 
+
       }
       catch(error){
         console.error(error);
@@ -42,7 +49,7 @@
 
     <div class="card flex flex-col gap-2 max-w-[700px] max-h-[750px] shadow-lg py-7 px-5">
 
-      <p class="font-light">This will be your display username</p>
+      <p class="font-light">Enter your username</p>
       <label class="input input-bordered flex items-center gap-2">
         <svg
           xmlns="http://www.w3.org/2000/svg"

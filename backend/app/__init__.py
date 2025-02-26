@@ -31,7 +31,12 @@ def createapp():
     """
     # Flask app creation and enables CORS for Svelte
     app = Flask(__name__)
-    CORS(app) 
+    CORS(app, resources={r"/*": {
+        "origins": ["http://localhost:5173", "http://127.0.0.1:5173"], "supports_credentials": True,
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }})
+
     # Uses Config class to establish database connection and inits the database
     app.config.from_object(Config) 
     db.init_app(app) 
@@ -48,10 +53,18 @@ def createapp():
     jwt = JWTManager(app)
 
     # sends these headers after every request to web-app; extra layer of security
-    @app.after_request
-    def add_security_headers(response):
-        response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000; script-src 'self'"
-        return response
+    # @app.after_request
+    # def add_security_headers(response):
+    #    # Add localhost:5173 to the connect-src directive
+    #     response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http://localhost:5000 http://localhost:5173; script-src 'self'"
+        
+    #     # Add CORS headers explicitly
+    #     response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
+    #     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    #     response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    #     response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
+    #     return response
     
     # limiter sets a default limit for each page in web-app; prevents bruteforce attacks   
     limiter = Limiter(
@@ -66,9 +79,11 @@ def createapp():
 
     # IMPORT ALL BLUEPRINTS HERE
     from app.core.routes import core
+    from app.auth.routes import auth
 
     # REGISTER ALL BLUEPRINTS HERE; use core as an example
     app.register_blueprint(core, url_prefix="/")
+    app.register_blueprint(auth, url_prefix="/auth")
 
     # creates migration directory; ignore as its for database development
     migrate = Migrate(app, db)

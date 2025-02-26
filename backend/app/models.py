@@ -5,21 +5,13 @@ from marshmallow_sqlalchemy import SQLAlchemySchema
 
 # Main Table : crucial user info that is referenced throughout db
 class User(db.Model, UserMixin):
-    __tablename__ = "user"
+    __tablename__ = "users"
     pid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(60), nullable=False)
     drexel_email = db.Column(db.String(60) ,nullable=False)
 
     # passwords encrypted in any endpoints they're asked for
     hashed_password = db.Column(db.String(80), nullable=False)
-
-    # use db.Date -> (year, month, day) excludes exact time ex. (2023, 1, 1)
-    enrollment_date = db.Column(db.Date, nullable=False)
-    graduation_date = db.Column(db.Date, nullable=False)
-
-    #if false; must be graduate student and must be manually coded
-    undergrad = db.Column(db.Boolean, default=True, nullable=False)
-    gpa = db.Column(db.Float, nullable=False)
 
     # add easy referencing by establishing relationships to other tables
     user_preference = db.relationship("UserPreferences", backref="student_user", lazy=True)
@@ -51,6 +43,13 @@ class UserProgram(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     student_pid = db.Column(db.Integer, db.ForeignKey(User.pid), nullable=False)
 
+    # use db.Date -> (year, month, day) excludes exact time ex. (2023, 1, 1)
+    enrollment_date = db.Column(db.Date, nullable=False)
+    graduation_date = db.Column(db.Date, nullable=False)
+
+    #if false; must be graduate student and must be manually coded
+    undergrad = db.Column(db.Boolean, default=True, nullable=False)
+    gpa = db.Column(db.Float, nullable=False)
     user_major = db.Column(db.String(255), nullable=False)
     user_credit_min = db.Column(db.Float, nullable=False)
     user_gpa_min = db.Column(db.Float, nullable=False)
@@ -120,14 +119,6 @@ class UserSchema(SQLAlchemySchema):
     # Drexel password; no need to input validate 
     hashed_password = fields.Str()
 
-    # to commit to database must follow this format
-    enrollment_date = fields.Date(format="%Y-%m-%d")
-    graduation_date = fields.Date(format="%Y-%m-%d")
-
-    # can be changed throughout
-    undergrad = fields.Bool()
-    gpa = fields.Float()
-
 
 class UserPreferencesSchema(SQLAlchemySchema):
     class Meta:
@@ -155,6 +146,14 @@ class UserProgramSchema(SQLAlchemySchema):
     # user program primary-key and student foreign key fields
     id = fields.Int(dump_only=True)
     student_pid = fields.Int(dump_only=True)
+
+    # to commit to database must follow this format
+    enrollment_date = fields.Date(format="%Y-%m-%d")
+    graduation_date = fields.Date(format="%Y-%m-%d")
+
+    # can be changed throughout
+    undergrad = fields.Bool()
+    gpa = fields.Float()
 
     # need this info to even ask about minor/concentration
     user_major = fields.Str()
