@@ -21,7 +21,6 @@ git push origin main
 ### 📝 Description
 
 DragonFlow is a comprehensive student success planner designed specifically for Drexel University students. It helps optimize academic planning by providing personalized course recommendations, schedule planning, and success metrics based on individual student needs.
-andrey is cool
 
 ## ✨ Key Features
 
