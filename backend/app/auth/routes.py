@@ -11,8 +11,12 @@ from flask_jwt_extended import (
     get_jwt_header, # header data
     get_jti, # very unique token identifier 
     get_jwt_identity # get user_id from token (same as primary key for user from db)
-    
 )
+import logging #will give us better errors printed in the console
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # create blueprint
 auth = Blueprint("auth", __name__)
@@ -32,12 +36,26 @@ def register():
     try:
         data = request.get_json()
         
-        username =data.get("username")
+        username = data.get("username")
         password = data.get("password")
         drexel_email = data.get("email")
+        confirm_password = data.get("confirm_password")
 
+
+        if not username or not password or not drexel_email or not confirm_password:
+            return jsonify({"msg": "Missing required fields"}), 400
+        
+        
+        # Check if passwords match
+        if password != confirm_password:
+            logger.error("Passwords don't match")  # Log error for devs
+            return jsonify({"msg": "Passwords do not match"}), 400  # User-friendly message for client (display to frontend)
+
+        
+        
     except Exception as e:
-        return jsonify({"msg": "invalid input form"}), 401
+        logger.error(f"Error in register route: {e}")
+        return jsonify({"msg": "Invalid input form", "error": str(e)}), 400
 
     try:
         # create a new user object in database
@@ -48,36 +66,44 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"msg": "successful registration"}), 200
+        return jsonify({"msg": "Successful registration"}), 200
     
     except Exception as e:
-        return jsonify({"msg": "could not create user object"}), 500
+        db.session.rollback() #the session is rolled back in case of an error.
+        logger.error(f"Error creating user: {e}")
+        return jsonify({"msg": "Could not create user object", "error": str(e)}), 500
 
 
 # Login route added token implementation; no GET ever since it's pure API communication
 @auth.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
+    try:
+        data = request.get_json()
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
 
-    user = User.query.filter_by(username=username).first()
+        if not username or not password:
+            return jsonify({"msg": "Missing username or password"}), 400
 
-    if user and check_password_hash(user.hashed_password, password):
-        login_user(user)
-        
-        # this will be sent to the frontend via dict struct: refer to tokens.py
-        user_tokens = tokens.gen_store_tokens(user.pid) # crucial as will make token identity same as primary keys
+        user = User.query.filter_by(username=username).first()
 
-        if user_tokens is None:
-            return jsonify({"msg": "error generating tokens"}), 500 # server error
+        if user and check_password_hash(user.hashed_password, password):
+            login_user(user)
+            
+            # this will be sent to the frontend via dict struct: refer to tokens.py
+            user_tokens = tokens.gen_store_tokens(user.pid) # crucial as will make token identity same as primary keys
 
-        return jsonify(
-            user_tokens
-        ), 200
-    else:
-        return jsonify({"msg": "invalid credentials"}), 401
+            if user_tokens is None:
+                return jsonify({"msg": "Error generating tokens"}), 500 # server error
+
+            return jsonify(user_tokens), 200
+        else:
+            return jsonify({"msg": "Invalid credentials"}), 401
+
+    except Exception as e:
+        logger.error(f"Error in login route: {e}")
+        return jsonify({"msg": "Server error during login", "error": str(e)}), 500
 
 
 # complete example of using jwt tokens for routing authentication
@@ -104,7 +130,8 @@ def logout():
         
     # bigger error; could mean querying didn't work etc.
     except Exception as e:
-        return jsonify({"msg": "Server error during logout"}), 500
+        logger.error(f"Error in logout route: {e}")
+        return jsonify({"msg": "Server error during logout", "error": str(e)}), 500
 
 
 # Dashboard route (protected)
@@ -112,5 +139,8 @@ def logout():
 @jwt_required() # just want to make sure access token is valid
 @login_required
 def dashboard():
-    return f"Welcome to the dashboard, {current_user.username}!"
-
+    try:
+        return f"Welcome to the dashboard, {current_user.username}!"
+    except Exception as e:
+        logger.error(f"Error in dashboard route: {e}")
+        return jsonify({"msg": "Server error", "error": str(e)}), 500
