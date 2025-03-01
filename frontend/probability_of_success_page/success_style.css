@@ -1,4 +1,5 @@
 .success_container {
+    display: block;
     justify-content: center;
     align-items: center;
     background-color: rgba(211, 211, 211, 0.365);
@@ -53,7 +54,7 @@ label {
 }
 
 .calculate_success {
-    width: 50%;
+    width: 40%;
     padding: 10px;
     background-color: rgb(20, 200, 255);
     color: rgb(255, 255, 255);
@@ -62,18 +63,23 @@ label {
     border-radius: 5px;
     cursor: pointer;
     display: block;
-    margin: auto;
+    margin-top: 20px;
+    margin-left: 125px;
 }
 
 .calculate_success:hover {
     background-color: #88e9ff;
 }
 
+.return_home:hover {
+    color: rgb(172, 172, 172);
+}
+
 a {
     font-size: 15px;
-    display: block;
-    margin-left: 150px;
-    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
     color: #000000;
     font-weight: bold;
     text-decoration: none;
