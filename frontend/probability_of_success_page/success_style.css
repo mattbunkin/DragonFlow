@@ -1,16 +1,33 @@
 .success_container {
-    display: block;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    width: 40%;
     background-color: rgba(211, 211, 211, 0.365);
     padding: 50px;
-    margin: 50px;
+    margin: 100px auto;
+    text-align: center;
     border-radius: 50px;
 }
 
+.gpa_name {
+    display: flex;
+    text-align: left;
+}
+
+.crn_name {
+    text-align: left;
+    width: 100%;
+}
+
 body {
+    display: flex;
     justify-content: center;
+    align-items: center;
+    height: 100hv;
     background-color: rgb(255, 255, 255);
+    flex-direction: column;
 }
 
 h1 {
@@ -19,12 +36,18 @@ h1 {
     align-items: center;
     font-weight: 300px;
     font-size: 40px;
+    margin-left: 11%;
+    text-align: left;
+    width: 100%;
 }
 
 h3 {
     font-size: 17px;
     margin-top: -20px;
     color: rgb(20, 200, 255);
+    width: 100%;
+    margin-left: 12%;
+    text-align: left;
 }
 
 #grade {
@@ -51,6 +74,7 @@ h3 {
 
 label {
     font-weight: bold;
+    text-align: left;
 }
 
 .calculate_success {
@@ -62,9 +86,8 @@ label {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    margin: 20px auto;
     display: block;
-    margin-top: 20px;
-    margin-left: 125px;
 }
 
 .calculate_success:hover {
@@ -77,10 +100,11 @@ label {
 
 a {
     font-size: 15px;
-    display: flex;
+    display: block;
     justify-content: center;
     margin-top: 20px;
     color: #000000;
     font-weight: bold;
     text-decoration: none;
+    text-align: center;
 }
