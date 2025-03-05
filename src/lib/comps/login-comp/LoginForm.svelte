@@ -11,7 +11,7 @@
   // Send data to backend through async await
   async function sendLoginData() {
       try {
-
+        // fetch from the localhost auth/login endpoint link; store it in response const
         const response = await fetch("http://127.0.0.1:5000/auth/login", 
           {
             method: "POST",
@@ -30,9 +30,13 @@
         const responseData = await response.json();
         responseMessage = responseData.msg || "Login successful"; 
 
+        // Show message if data successfully sent
+        console.log(responseMessage)
+
       }
+      // grab any error and display it in browser console (for now)
       catch(error){
-        console.error(error);
+        console.error(`Failed to fetch data: ${error}`);
       }
   }
 </script>

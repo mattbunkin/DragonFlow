@@ -5,7 +5,7 @@
     import { CalendarSearch } from "lucide-svelte";
     import { Smile } from "lucide-svelte";
 
-    // Script for the success bar
+    // script for the success bar
     let value = $state(13);
     onMount(() => {
         const timer = setTimeout(() => (value = 66), 500);

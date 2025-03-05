@@ -1,5 +1,5 @@
 <script lang="ts">
-
+  // bind these values to input so once they're sent they're what user inputted
   let inputData = {
     username: "",
     email: "",
@@ -11,8 +11,9 @@
 
   // send data from sign-up form to backend 
   async function sendRegistrationData() {
+    // try getting authorization from backend to send data
     try {
-
+      // fetch from the localhost auth/register endpoint link; store it in response const
         const response = await fetch("http://127.0.0.1:5000/auth/register", 
           {
             method: "POST",
@@ -25,15 +26,19 @@
           }
         )
         if (!response.ok) {
-          throw new Error(`HTTP error. Status:${response.status}`);
+          throw new Error(`HTTP while fetching error. Status:${response.status}`);
         }
-
+        
         const responseData = await response.json();
         responseMessage = responseData.msg || "Login successful"; 
 
+        // Show message if data successfully sent
+        console.log(responseMessage)
+
       }
+      // grab any error and display it in browser console (for now)
       catch(error){
-        console.error(error);
+        console.error(`Failed to fetch data: ${error}`);
       }
   }
 
