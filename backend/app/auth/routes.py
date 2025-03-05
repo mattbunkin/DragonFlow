@@ -2,6 +2,7 @@ from app import db
 from app.models import User  
 from app.utils import tokens
 from datetime import date 
+from scripts.model import model
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash  
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -135,7 +136,7 @@ def logout():
 
 
 # Dashboard route (protected)
-@auth.route("/dashboard")
+@auth.route("/scheduler")
 @jwt_required() # just want to make sure access token is valid
 @login_required
 def dashboard():
