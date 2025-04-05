@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
+
   // bind to input tag
   let inputData = { 
           username: "",
@@ -8,7 +10,7 @@
   let responseMessage = ""
 
 
-  // Send data to backend through async await
+  // Send data to backend through post request in json format w/ cookie credentials
   async function sendLoginData() {
       try {
         // fetch from the localhost auth/login endpoint link; store it in response const
@@ -27,11 +29,17 @@
           throw new Error(`HTTP error. Status:${response.status}`);
         }
 
-        const responseData = await response.json();
-        responseMessage = responseData.msg || "Login successful"; 
+        // getting up until here means we avoided all errors and can store data and redirect
+        else if (response.ok) {
+          const responseData = await response.json();
 
-        // Show message if data successfully sent
-        console.log(responseMessage)
+          // store access token
+          localStorage.setItem("access_token", responseData.user_access_token);
+          
+          // let user go to main scheduler/dashboard page
+          await goto("/scheduler")
+
+        }
 
       }
       // grab any error and display it in browser console (for now)
@@ -93,7 +101,7 @@
             d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
             clip-rule="evenodd" />
         </svg>
-        <input bind:value={inputData.password} type="password" class="grow"/>
+        <input bind:value={inputData.password} type="password" class="grow text-xs" placeholder="8+ characters with numbers and letters"/>
       </label>
 
       <!-- Easy Redirection-->

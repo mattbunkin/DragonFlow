@@ -147,7 +147,10 @@ def traverse_pre_reqs(parsed_nested_pre_reqs: list, all_course_pre_reqs: dict) -
     return all_course_pre_reqs
 
 
-def can_take_course(course_to_check: str, completed_courses: list, all_course_pre_reqs: dict) -> True | False:
+def can_take_course(
+        course_to_check: str, 
+        completed_courses: list, 
+        all_course_pre_reqs: dict) -> bool:
     """
     ### Determine if a student can take a course based on completed courses and pre-reqs.
     helper function that will be used for the main recursive algorithm that will determine 
@@ -159,7 +162,7 @@ def can_take_course(course_to_check: str, completed_courses: list, all_course_pr
         - all_course_pre_reqs: the full structured dict of pre-reqs for a specific course  
     """
 
-    # BC1: course is already completed
+    # BC1: course is already completed from user's pre-reqs
     if course_to_check in completed_courses:
         return True
     
@@ -170,7 +173,7 @@ def can_take_course(course_to_check: str, completed_courses: list, all_course_pr
     # get pre-reqs for this course
     prereqs = all_course_pre_reqs[course_to_check]
     
-    # case where there is simply no pre-reqs 
+    # case where there is simply no pre-reqs (empty string)
     if not prereqs:
         return True
     
@@ -178,7 +181,11 @@ def can_take_course(course_to_check: str, completed_courses: list, all_course_pr
     return check_pre_req_list(prereqs, completed_courses, all_course_pre_reqs)
 
 
-def check_pre_req_list(pre_req_list: list, completed_courses: list, all_course_pre_reqs: dict, index: int=0):
+def check_pre_req_list(
+        pre_req_list: list, 
+        completed_courses: list, 
+        all_course_pre_reqs: dict, 
+        index: int=0) -> bool:
     """
     ### Recursively check if a list of pre-reqs is satisfied.
     
@@ -186,7 +193,7 @@ def check_pre_req_list(pre_req_list: list, completed_courses: list, all_course_p
         - pre_req_list: list of pre-reqs and logical operators
         - completed_courses: list of courses the student has completed
         - all_course_pre_reqs: structured dict that has a target's course entire pre-reqs
-        - index: the index used for iteration specifically in pre-req list
+        - index: the index used for iteration specifically in pre-req list for recursion
     """
 
     # really hard to visualize but this base case works; makes sure we dont surpass list
@@ -279,7 +286,16 @@ def check_pre_req_list(pre_req_list: list, completed_courses: list, all_course_p
         return check_pre_req_list(pre_req_list, completed_courses, all_course_pre_reqs, index + 1)
 
 # get course crn via course name
-def get_course_crn(course_name: str):
+def get_course_crn(course_name: str) -> int:
+    """
+    ### uses the course name to get the course crn for ML model
+    - loops through data file to find the course name inputted by user
+    - returns the FIRST instance of a course's CRN
+
+    #### args:
+    - string of the course name in subject code and course number format
+    ex. "CS164"
+    """
     with open(DATA_FILE) as data_file:
         course_content = data_file.read()
         course_data = json.loads(course_content)
@@ -289,13 +305,81 @@ def get_course_crn(course_name: str):
             # use string concatenation get course with same subject code and number
             if course_name ==  course["subject_code"]+course["course_number"]:
                 # simply get the crn
-                course_crn = course["crn"]
+                course_crn = int(course["crn"])
 
     return course_crn
     
+def is_course_available(target_course: str, completed_courses: list) -> bool:
+    """
+    ### takes a simple target course and completed user pre-reqs list to evaluate if a user is eligible to take course
+    - creates structured dictionary of pre-reqs
+    - performs all functions to evaluate this 
+
+    #### args:
+    - target_course: string of course subject code and subject numbers for ex. "CS164"
+    - completed_courses: list of strings that contain same format as user's taken pre-reqs
+    """
+
+    # use py parse to initially parse course pre-reqs
+    parsed_target_pre_reqs = parse_pre_reqs(target_course)
+
+    # initialize algorithm by setting up our custom data structure
+    structured_pre_reqs = {
+        target_course: parsed_target_pre_reqs
+    }
+
+    # make a 'tree' like structure of ALL of the pre-req's for a course
+    all_target_pre_reqs = traverse_pre_reqs(
+        parsed_nested_pre_reqs=parsed_target_pre_reqs, 
+        all_course_pre_reqs=structured_pre_reqs
+    )
+
+    # save boolean value of whether a user can or can't take a course via pre-reqs
+    pre_req_eligibility = can_take_course(
+        course_to_check=target_course,
+        completed_courses=completed_courses,
+        all_course_pre_reqs=all_target_pre_reqs
+    )
+
+    # set this up so if user doesn't have necessary pre-reqs just stop function 
+    if pre_req_eligibility is False:
+        return False
     
+
+
+    return pre_req_eligibility
+    
+
+
+    
+
+
+
 
 
 # testing functions
 if __name__ == "__main__":
-    pass
+    pp_parsed_pre_reqs = parse_pre_reqs("CS277")    
+    print(f"Parsed but not structured top-level pre-reqs:{pp_parsed_pre_reqs}\n")
+
+    # put the course in a new dict to contain all pre-reqs 
+    structured_pre_reqs = {
+        "CS277": pp_parsed_pre_reqs
+    }
+
+    all_course_pre_reqs = traverse_pre_reqs(pp_parsed_pre_reqs, structured_pre_reqs)
+
+    # print the pre-reqs for a specific course in ordered 
+    for key, value in all_course_pre_reqs.items():
+        print(f"The course name: {key}")
+        print(f"The course pre-reqs: {value}\n")
+
+    test_cases = [
+        ["CS260", "CS270", "MATH221", "CS265"],  # false
+        ["CS260", "CS270", "MATH221", "CS265", "ECE105"],  # TRUE
+        ["CS260", "CS270", "MATH221", "CS265", "CS172"],  # false
+        ["CS260", "CS270", "MATH221", "CS265", "CS172", "CS171"],  # true
+    ]
+
+    for course in test_cases:
+        print(f"pre-req test case: {course}\nSatisfies: {can_take_course("CS277", course, all_course_pre_reqs)}\n")

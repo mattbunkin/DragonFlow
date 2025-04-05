@@ -6,6 +6,7 @@ import { FlaskConical } from 'lucide-svelte';
 import { Earth } from 'lucide-svelte';
 import { Binary } from 'lucide-svelte';
 import { goto } from '$app/navigation';
+import CustomButton from './CustomButton.svelte';
  // Scroll down to see the original Component
  import { cn } from "$lib/utils";
                 import AnimatedBeam from "$lib/components/ui/animation/AnimatedBeam.svelte";
@@ -216,12 +217,12 @@ function goToLogin(){
                 <AnimatedBeam bind:containerRef bind:fromRef={div5Ref} bind:toRef={div6Ref} />
                 <AnimatedBeam bind:containerRef bind:fromRef={div6Ref} bind:toRef={div7Ref} />
             </div>
-            <button class="glow bg-gradient-to-r
-                        from-cyan-400 to-sky-500 text-stone-100 text-xl
-                        font-semibold px-6 py-3 rounded-3xl mt-10 block m-auto" 
-                        on:click={goToLogin}>
-                    Get Started
-              </button>
+
+            <CustomButton 
+              buttonText={"Get Started"}
+              buttonFunc={goToLogin}
+            />
+            
         </div>
 
     </div>

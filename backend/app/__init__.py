@@ -1,5 +1,6 @@
 # every __init__.py will treat directories containing files as packages
 from flask import Flask
+from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -15,7 +16,11 @@ import os
 load_dotenv()
 
 JWT_SECRET = os.environ.get('JWT_SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 db = SQLAlchemy()
+jwt = JWTManager()
+login_manager = LoginManager()
+
 
 def createapp():
     """
@@ -39,18 +44,22 @@ def createapp():
 
     # Uses Config class to establish database connection and inits the database
     app.config.from_object(Config) 
+
+    # establish instance connections
+    app.secret_key = SECRET_KEY
     db.init_app(app) 
+    jwt.init_app(app)
+    login_manager.init_app(app)
 
     # allows for jwt-extended to automatically verify by token signature
     app.config["JWT_SECRET_KEY"] = JWT_SECRET
+
     # extended config keys provided by flask; allows for jwt-extended to take advantage of key features.
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(minutes=30)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
     app.config["JWT_TOKEN_LOCATION"] = ["headers"] # look for token in headers
     app.config["JWT_HEADER_NAME"] = "Authorization" # look for header in auth
     app.config["JWT_HEADER_TYPE"] = "Bearer" # bearer is the prefix before actual token
-    
-    jwt = JWTManager(app)
 
     # sends these headers after every request to web-app; extra layer of security
     @app.after_request
@@ -77,13 +86,15 @@ def createapp():
         strategy="fixed-window"
     )
 
-    # IMPORT ALL BLUEPRINTS HERE
-    from app.core.routes import core
-    from app.auth.routes import auth
+    # make sure all blueprints have app context
+    with app.app_context():
+        # IMPORT ALL BLUEPRINTS HERE
+        from app.core.routes import core
+        from app.auth.routes import auth
 
-    # REGISTER ALL BLUEPRINTS HERE; use core as an example
-    app.register_blueprint(core, url_prefix="/")
-    app.register_blueprint(auth, url_prefix="/auth")
+        # REGISTER ALL BLUEPRINTS HERE; use core as an example
+        app.register_blueprint(core, url_prefix="/")
+        app.register_blueprint(auth, url_prefix="/auth")
 
     from app.models import (
         User, UserPreferences, UserProgram, 

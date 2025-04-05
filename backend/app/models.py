@@ -7,6 +7,10 @@ from marshmallow_sqlalchemy import SQLAlchemySchema
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     pid = db.Column(db.Integer, primary_key=True)
+
+    def get_id(self):
+        return (self.pid)
+    
     username = db.Column(db.String(60), nullable=False)
     drexel_email = db.Column(db.String(60) ,nullable=False)
 
@@ -48,17 +52,21 @@ class UserProgram(db.Model, UserMixin):
     graduation_date = db.Column(db.Date, nullable=False)
 
     #if false; must be graduate student and must be manually coded
-    undergrad = db.Column(db.Boolean, default=True, nullable=False)
+    is_undergrad = db.Column(db.Boolean, default=True, nullable=False)
     gpa = db.Column(db.Float, nullable=False)
-    user_major = db.Column(db.String(255), nullable=False)
-    user_credit_min = db.Column(db.Float, nullable=False)
-    user_gpa_min = db.Column(db.Float, nullable=False)
-    user_concentration_needed = db.Column(db.Boolean, nullable=False)
-    user_minor_needed = db.Column(db.Boolean, nullable=False)
-    user_calendar_type = db.Column(db.String(255), nullable=False)
+
+    major = db.Column(db.String(255), nullable=False)
+    concentrations = db.Column(db.String(255), nullable=True)
+    minor = db.Column(db.String(255), nullable=True)
+
+    credits_min = db.Column(db.Float, nullable=False)
+    gpa_min = db.Column(db.Float, nullable=False)
+    concentration_needed = db.Column(db.Boolean, nullable=False)
+    minor_needed = db.Column(db.Boolean, nullable=False)
+    calendar_type = db.Column(db.Boolean, nullable=False)
 
     # True if CO-OP cycle is 5 year; false if not
-    user_coop_type = db.Column(db.Boolean, nullable=False)
+    coop_type = db.Column(db.Boolean, nullable=False)
 
 
 # our own proper course catalogue to refer to after scraping
@@ -79,10 +87,14 @@ class UserTermPlanning(db.Model, UserMixin):
 class RefreshTokens(db.Model):
     __tablename__ = "refresh_tokens"
     id = db.Column(db.Integer, primary_key=True)
+    
+    def get_id(self):
+        return (self.pid)
+
     student_pid = db.Column(db.Integer, db.ForeignKey(User.pid), nullable=False)
 
     # important token columns; no expiration column since jwt_extended handles this
-    token = db.Column(db.String(255), nullable=False, unique=True)
+    token = db.Column(db.String(1024), nullable=False, unique=True)
     created_at = db.Column(db.DateTime, nullable=False)
     revoked = db.Column(db.Boolean, default=False)
 
@@ -152,20 +164,23 @@ class UserProgramSchema(SQLAlchemySchema):
     graduation_date = fields.Date(format="%Y-%m-%d")
 
     # can be changed throughout
-    undergrad = fields.Bool()
+    is_undergrad = fields.Bool()
     gpa = fields.Float()
 
     # need this info to even ask about minor/concentration
-    user_major = fields.Str()
-    user_credit_min = fields.Float()
-    user_gpa_min = fields.Float()
+    major = fields.Str()
+    concentrations = fields.Str()
+    minor = fields.Str()
+    
+    credits_min = fields.Float()
+    gpa_min = fields.Float()
     
     # for any major; both options must either be true or false
-    user_concentration_needed = fields.Bool()
-    user_minor_needed = fields.Bool()
-    user_coop_type = fields.Bool() # same idea here for CO-OP type
+    concentration_needed = fields.Bool()
+    minor_needed = fields.Bool()
+    coop_type = fields.Bool() # same idea here for CO-OP type
 
-    user_calendar_type = fields.Str()
+    calendar_type = fields.Bool()
 
 
 class UserTermPlanningSchema(SQLAlchemySchema):

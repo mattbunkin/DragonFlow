@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
+
   // bind these values to input so once they're sent they're what user inputted
   let inputData = {
     username: "",
     email: "",
     password: "",
-    confirmed_password: "",
+    confirm_password: "",
 
   }
   let responseMessage = ""
@@ -29,11 +31,17 @@
           throw new Error(`HTTP while fetching error. Status:${response.status}`);
         }
         
-        const responseData = await response.json();
-        responseMessage = responseData.msg || "Login successful"; 
+       // getting up until here means we avoided all errors and can store data and redirect
+       else if (response.ok) {
+          const responseData = await response.json();
 
-        // Show message if data successfully sent
-        console.log(responseMessage)
+          // store access token
+          localStorage.setItem("access_token", responseData.user_access_token);
+          
+          // redirect user after making new account to prompt for important info
+          await goto("/personalize-account")
+
+        }
 
       }
       // grab any error and display it in browser console (for now)
@@ -96,7 +104,7 @@
             d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
             clip-rule="evenodd" />
         </svg>
-        <input bind:value={inputData.password} type="password" class="grow text-sm" placeholder="Must be at least 8 characters"/>
+        <input bind:value={inputData.password} type="password" class="grow text-sm" placeholder="Enter your password"/>
       </label>
 
       <p>Confirm Password</p>
@@ -111,7 +119,7 @@
             d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z"
             clip-rule="evenodd" />
         </svg>
-        <input bind:value={inputData.confirmed_password} type="password" class="grow" />
+        <input bind:value={inputData.confirm_password} type="password" class="grow" placeholder="Confirm your password"/>
       </label>
 
       <!-- Submit Info -->
