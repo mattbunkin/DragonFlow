@@ -1,4 +1,3 @@
-
 const rmp = require("ratemyprofessor-api");
 
 (async () => {
