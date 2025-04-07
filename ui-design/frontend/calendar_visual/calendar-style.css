@@ -1,0 +1,149 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    max-width: 1000px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 3rem;
+    color: #333;
+}
+
+.total-credits {
+    font-size: 1.2rem;
+    color: #555;
+    font-weight: bold;
+    align-self: flex-end;
+    justify-content: right;
+}
+
+.schedule table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f1f1f1;
+}
+
+.class-cell {
+    color: #00796b;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    padding: 12px;
+}
+
+.class-cell span {
+    display: block;
+    font-size: 1rem;
+    color: #555;
+}
+
+.class-bubble {
+    padding: 15px 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    color: #333;
+    display: inline-block;
+    min-width: 100px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.class-bubble span {
+    font-size: 0.85rem;
+    color: #555;
+    font-weight: normal;
+}
+
+.blue {
+    background-color: #e2f2fd;
+    color: #1565c0;
+    cursor: pointer;
+}
+
+.blue:hover {
+    background-color: #bbdefb;
+}
+
+.yellow {
+    background-color: #fff9c4;
+    color: #f57f17;
+    cursor: pointer;
+}
+
+.yellow:hover {
+    background-color: #fff59d;
+}
+
+.purple {
+    background-color: #f3e5f5;
+    color: #6a1b9a;
+    cursor: pointer;
+}
+
+.purple:hover {
+    background-color: #e1bee7;
+}
+
+.green {
+    background-color: #e8f5e9;
+    color: #388e3c;
+    cursor: pointer;
+}
+
+.green:hover {
+    background-color: #c8e6c9;
+}
+
+.red {
+    background-color: #ffebee;
+    color: #c62828;
+    cursor: pointer;
+}
+
+.red:hover {
+    background-color: #ffcdd2;
+}
+
+.time {
+    font-size: 0.9rem;
+    color: #888888;
+    font-weight: b;
+    padding-left: 20px;
+    padding-right: 20px;
+}

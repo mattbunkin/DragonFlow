@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DragonFlow: Calendar View | Course Schedule</title>
+    <link rel="stylesheet" href="calendar-style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1 class="calendar-title">Course Schedule</h1>
+            <span class="total-credits">Total Credits: 7</span>
+            <div id="calendar"></div>
+        </header>
+
+        <div class="schedule">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                    </tr>
+                </thead>
+
+                <tbody id="course-list">
+                    <tr>
+                        <td class="time">8:00 AM</td>
+                        <td></td>
+                        <td class="class-cell">
+                            <div class="class-bubble blue" draggable="true">
+                                MATH123<br><span>Jeff Bezos</span>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="class-cell">
+                            <div class="class-bubble green" draggable="true">
+                                CS172<br><span>Mark Rober</span>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">9:00 AM</td>
+                        <td></td>
+                        <td></td>
+                        <td class="class-cell">
+                            <div class="class-bubble red" draggable="true">
+                                PHYS101<br><span>Albert Einstein</span>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">10:00 AM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">11:00 AM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="class-cell">
+                            <div class="class-bubble purple" draggable="true">
+                                CI103<br><span>Elon Musk</span>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">12:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">1:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <div class="class-bubble yellow" draggable="true">
+                                CS172<br><span>Jessica Williams</span>
+                            </div>
+                        </td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">2:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">3:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">4:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">5:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">6:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">7:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">8:00 PM</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    
+</body>
+</html>
