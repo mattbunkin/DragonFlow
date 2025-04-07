@@ -48,7 +48,6 @@ def register():
         drexel_email = data.get("email")
         confirm_password = data.get("confirm_password")
 
-
         if not username or not password or not drexel_email or not confirm_password:
             return jsonify({"msg": "Missing required fields"}), 400
         
@@ -90,7 +89,7 @@ def register():
         logger.error(f"Error creating user: {e}")
         return jsonify({
             "msg": "Could not create user object",
-             "error": str(e)
+            "error": str(e)
         }), 500
 
 
@@ -107,7 +106,7 @@ def login():
     try:
         data = request.get_json()
         username = data.get("username")
-        email = data.get("email")
+        email = data.get("email") 
         password = data.get("password")
 
         if not username or not password:
