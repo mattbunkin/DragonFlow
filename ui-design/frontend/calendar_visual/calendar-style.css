@@ -17,12 +17,13 @@ body {
     width: 100%;
     height: 100%;
     max-width: 1000px;
-    padding: 30px;
+    padding: 50px;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     margin-top: 100px;
     margin-bottom: 100px;
+    margin-left: 40px;
 }
 
 header {
@@ -90,6 +91,17 @@ th {
     font-weight: normal;
 }
 
+.class-bubble.dragging {
+    opacity: 0.5;
+    transform: scale(1.1);
+    cursor: grabbing;
+}
+
+.drag-box.drag-over {
+    background-color: #e0f7fa;
+    border: 2px dashed #00796b;
+}
+
 .blue {
     background-color: #e2f2fd;
     color: #1565c0;
@@ -146,4 +158,59 @@ th {
     font-weight: b;
     padding-left: 20px;
     padding-right: 20px;
+}
+
+.reset-schedule {
+    margin-top: 30px;
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.reset-schedule:hover {
+    background-color: #ff5e5e;
+}
+
+.view-class-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.class-view-container {
+    width: 100%;
+    height: 100%;
+    margin-left: 10px;
+    margin-right: 40px;
+    max-width: 500px;
+    padding: 50px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 100px;
+    margin-top: -732px;
+}
+
+.drag-box {
+    width: 300px;
+    min-height: 200px;
+    margin: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+}
+
+.drag-box-content {
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #cdcdcd;
+    border-radius: 8px;
+    margin: 20px;
 }
