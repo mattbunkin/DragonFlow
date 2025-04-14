@@ -1,61 +1,38 @@
 const rmp = require("ratemyprofessor-api");
 
+// Helper function to get average rating
+async function getAvgRating(professorName, schoolId) {
+  const data = await rmp.getProfessorRatingAtSchoolId(professorName, schoolId);
+  return data?.avgRating;
+}
+
+// Helper function to get professor's RMP link
+async function getProfessorLink(professorName, schoolId) {
+  const data = await rmp.getProfessorRatingAtSchoolId(professorName, schoolId);
+  return data?.link;
+}
+
+// Helper function to fetch and display a professor's info
+async function displayProfessorInfo(profName, schoolId) {
+  const rating = await getAvgRating(profName, schoolId);
+  const link = await getProfessorLink(profName, schoolId);
+
+  console.log(`\nProfessor: ${profName}`);
+  console.log(`Rating: ${rating ?? "Not found"}`);
+  console.log(`Link: ${link ?? "Not available"}`);
+}
+
 (async () => {
-  const school = await rmp.searchSchool("Drexel University");
-  if (school !== undefined) {
-    const schoolId = school[0].node.id;
-
-    // to search for professors with a name and get all query results
-    const DanielMoixSearchResults = await rmp.searchProfessorsAtSchoolId(
-      "Daniel Moix",
-      schoolId
-    );
-    
-    //console.log(DanielMoixSearchResults);
-
-    //This function will return the average rating of a professor at a specific school
-    async function getavgRating(professorName, schoolId) {
-        const ratingData = await rmp.getProfessorRatingAtSchoolId(professorName, schoolId);
-        return {
-            avgRating: ratingData.avgRating
-        };
-    }
-
-
-    // This function will return the link to a professor's page at a specific school
-    async function getProfessorLink(professorName, schoolId) {
-        const ratingData = await rmp.getProfessorRatingAtSchoolId(professorName, schoolId);
-        return ratingData.link;
-    }
-    
-    
-
-    // // to search for a professor with a specific name and get only the ratings and other relevant information
-    // const DanielMoixRatings = await rmp.getProfessorRatingAtSchoolId(
-    //   "Daniel Moix",
-    //   schoolId
-    // );
-    // const boadyRatings =await rmp.getProfessorRatingAtSchoolId(
-    //     "Mark Boady",
-    //     schoolId
-    // );
-
-    
-    const moixRating = await getavgRating("Daniel Moix", schoolId);
-    const boadyRating = await getavgRating("Mark Boady", schoolId);
-    const moixLink = await getProfessorLink("Daniel Moix", schoolId);
-    const boadyLink = await getProfessorLink("Mark Boady", schoolId);
-
-    //This is for testing the links and ratings, later we will remove the console logs
-    console.log("Daniel Moix's link:");
-    console.log(moixLink);
-    console.log("Daniel Moix's Rating:");
-    console.log(moixRating.avgRating);
-    console.log("Mark Boady's link:");
-    console.log(boadyLink);
-    console.log("Mark Boady's rating:") // e.g., 4.5
-    console.log(boadyRating.avgRating)  
-} else {
-    console.log("unknown school name");
+  const schoolSearchResults = await rmp.searchSchool("Drexel University");
+  //Error is displayed if a school is not found
+  if (!schoolSearchResults?.length) {
+    console.log("School not found.");
+    return;
   }
+
+  const schoolId = schoolSearchResults[0].node.id;
+  
+  //Test the functionality of the API using CCI professors
+  await displayProfessorInfo("Tammy Pirmann", schoolId);
+  await displayProfessorInfo("Mark Boady", schoolId);
 })();

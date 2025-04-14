@@ -1,38 +1,16 @@
-import os
-import sys
-from flask_migrate import Migrate, upgrade
+from flask import Flask
+from app.models import db  # where SQLAlchemy() is initialized
+from app import models  # this will register your models
+from app.config import Config  # optional: if you're storing config in a class
 
-# Add the current directory to Python's path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, script_dir)
-
-# Import your app
-from app import createapp, db
-from app.models import User, UserPreferences, UserProgram, Courses, UserTermPlanning, RefreshTokens
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)  # or just hardcode config if you want
+    db.init_app(app)
+    return app
 
 if __name__ == "__main__":
-    try:
-        app = createapp()
-        
-        with app.app_context():
-            print("Starting database upgrade...")
-            # Make sure migrations directory exists
-            if not os.path.exists("migrations"):
-                print("Initializing migrations directory...")
-                from flask_migrate import init
-                init()
-            
-            # Create migration if needed
-            from flask_migrate import migrate
-            print("Creating migration...")
-            migrate(message="Initial migration")
-            
-            # Apply migration
-            print("Applying migration...")
-            upgrade()
-            
-            print("Database setup completed successfully!")
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+        print("✅ Tables created successfully!")
