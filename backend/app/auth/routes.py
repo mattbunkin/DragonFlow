@@ -1,3 +1,7 @@
+import os 
+from dotenv import load_dotenv
+from scripts import model
+from scripts import prereqs
 from app import db, login_manager
 from app.models import User, UserProgram
 from app.utils import tokens
@@ -13,6 +17,11 @@ from flask_jwt_extended import (
     get_jwt_identity # get user_id from token (same as primary key for user from db)
 )
 import logging #will give us better errors printed in the console
+
+# load in course data 
+load_dotenv()
+COURSE_DATA = os.environ.get("DATA_FILE")
+
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -276,3 +285,50 @@ def personalize_account():
             "msg": "Could not save student data to db", 
             "error": str(e)
         }), 500
+@auth.route("/course-retriever")
+def course_retriever():
+    """
+    ### Endpoint that gets data to check if course exists
+    endpoint will receive data when user types in the searchbar a 
+    course with its course subject code and number; it returns ALL
+    instances of course if found and the probability of success
+    for course by feeding the model the course CRN and student's gpa. Returns and displays error
+    if not found.
+    """
+    # get data from user search
+    data = request.get_data()
+    gpa = data["gpa"]
+    course = data["course"]
+
+    try:
+        # get one course's entire CRN for the quarter 
+        course_crns = prereqs.get_course_crn(course_name=course, find_all=True) 
+        course_info = prereqs.get_crns_info(course_crns)
+        
+        # get model to calculate probability 
+        try:
+            gpa = float(gpa)
+            course_crn = course_crns[0]
+            probability = model.predict_success_probability(gpa, course_crn)
+            # return list of dicts back to frontend
+            return jsonify({
+                "course_data": course_info,
+                "probability_score": 0
+            }), 200
+
+        # error if type or crn is not found
+        except ValueError as e:
+            return jsonify({
+                "msg": "enter valid crn or gpa types",
+                "error": str(e),
+            }), 400
+
+    # return error shown from scripts if not able to look up any of these
+    except LookupError as e:
+        return jsonify({
+            "msg": "Could not find course in course data.",
+            "error": str(e)
+        }), 400
+
+
+

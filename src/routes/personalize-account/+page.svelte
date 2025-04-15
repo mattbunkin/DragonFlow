@@ -5,6 +5,7 @@ import TextInput from '$lib/comps/personalize-comp/textInput.svelte';
 import NumberInput from '$lib/comps/personalize-comp/NumberInput.svelte';
 import CustomButton from '$lib/comps/home-comp/CustomButton.svelte';
 import { goto } from '$app/navigation';
+
 /* 
     Explanation of default data types:
     - minor and concentrations can be empty
@@ -17,6 +18,7 @@ import { goto } from '$app/navigation';
     - calendar_type is true if a student goes by quarter system but false
     if student goes by semester system
 */
+
 let studentData = $state({
     major: "",
     minor: "",
@@ -103,18 +105,21 @@ async function sendStudentData(){
     <TextInput
       inputHeader={"What are your major(s)?"}
       inputPlaceholder={"e.g. Biology, Computer Science"}
+      textStyling={"font-semibold text-lg mb-2"}
       bind:studentInput={studentData.major}
     />
 
     <TextInput
-      inputHeader={"What's your minor(s) (optional)"}
-      inputPlaceholder={"e.g. Chemistry"}
+      inputHeader="What's your minor(s) (optional)"
+      inputPlaceholder="e.g. Chemistry"
+      textStyling="font-semibold text-lg mb-2"
       bind:studentInput={studentData.minor}
     />
 
     <TextInput
       inputHeader={"Any concentrations? (optional)"}
       inputPlaceholder={"e.g. Algorithm Design, Artificial Intelligence"}
+      textStyling={"font-semibold text-lg mb-2"}
       bind:studentInput={studentData.concentrations}
     />
 
@@ -249,18 +254,21 @@ async function sendStudentData(){
     <NumberInput
       inputHeader={"What's your cumulative GPA so far?"}
       customStep={0.1}
+      textStyling="font-semibold text-lg mb-2"
       bind:studentInput={studentData.gpa}
     />
 
     <NumberInput
       inputHeader={"What's your major's minimum GPA for graduation?"}
       customStep={0.1}
+      textStyling="font-semibold text-lg mb-2 "
       bind:studentInput={studentData.min_gpa}
     />
 
     <NumberInput
       inputHeader={"What's your major's minimum credits for graduation?"}
       customStep={1}
+      textStyling="font-semibold text-lg mb-2"
       bind:studentInput={studentData.min_credits}
     />
 

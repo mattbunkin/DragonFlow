@@ -286,7 +286,7 @@ def check_pre_req_list(
         return check_pre_req_list(pre_req_list, completed_courses, all_course_pre_reqs, index + 1)
 
 # get course crn via course name
-def get_course_crn(course_name: str) -> int:
+def get_course_crn(course_name: str, find_all=False) -> int:
     """
     ### uses the course name to get the course crn for ML model
     - loops through data file to find the course name inputted by user
@@ -295,10 +295,19 @@ def get_course_crn(course_name: str) -> int:
     #### args:
     - string of the course name in subject code and course number format
     ex. "CS164"
+
+    - find_all=True (defaulted at false) but if True this will return a list
+    with a specific course's entire CRNs
     """
     with open(DATA_FILE) as data_file:
         course_content = data_file.read()
         course_data = json.loads(course_content)
+        
+        # empty string until crn found
+        course_crn = ""
+        
+        # store all crns found into list if find_all=True
+        course_crns = []
     
         # we loop through the json data key and value pairs with the value being the dict
         for crn, course in course_data.items():
@@ -307,8 +316,56 @@ def get_course_crn(course_name: str) -> int:
                 # simply get the crn
                 course_crn = int(course["crn"])
 
+                # if you want all crn here it will append value that it found 
+                if find_all:
+                    course_crns.append(course_crn)
+                    continue
+
+    # if our list is empty then raise error where course not found
+    if find_all and not course_crns:
+        raise LookupError("Course CRNS not found.")
+    
+    # this case is if find_all == False
+    if not find_all and not course_crn:
+        raise LookupError("Course CRN not found.")
+
+    if find_all:
+        return course_crns
+    
     return course_crn
     
+
+
+def get_crns_info(crns: list) -> list[dict]:
+    """
+    ### find each json data object associated with each entry of list and store in list pd dictionaries
+    - loops through file full of data
+    - checks to see if crn in file full of data matches with one of our crns inside our list
+
+    #### args:
+    - crns: list of one specific course's entire crns, goal is to get each 
+    time slot, lecturer, and any type of data for just one course through
+    all of its crns 
+    """
+    with open(DATA_FILE) as data_file:
+        course_content = data_file.read()
+        course_data = json.loads(course_content)
+
+        # store one course's entire data in a list of all of its crns data
+        crns_data = []
+        for our_crn in crns:
+            for crn, data in course_data.items():
+                # store one the entire data found for one crn in list 
+                if int(crn) == our_crn:
+                    crns_data.append(data)
+
+    if not crns_data:
+        raise LookupError("Could not find any data under these CRNs.")
+    
+    return crns_data
+                
+
+
 def is_course_available(target_course: str, completed_courses: list) -> bool:
     """
     ### takes a simple target course and completed user pre-reqs list to evaluate if a user is eligible to take course
@@ -383,3 +440,9 @@ if __name__ == "__main__":
 
     for course in test_cases:
         print(f"pre-req test case: {course}\nSatisfies: {can_take_course("CS277", course, all_course_pre_reqs)}\n")
+    # example usage
+    course_crns = get_course_crn(course_name="CS3000")
+    print(course_crns)
+    course_info = get_crns_info(course_crns)
+    for course in course_info:
+        print(f"Course info:\n{course}\n")

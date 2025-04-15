@@ -1,79 +1,110 @@
 <script lang="ts">
-    import CourseDropdown from "$lib/comps/algo-comp/CourseDropdown.svelte";
-    import Progress from "$lib/components/ui/progress/progress.svelte";
-    import { onMount } from "svelte";
+   import CustomDropDown from "$lib/comps/algo-comp/CustomDropDown.svelte";
+   import Progress from "$lib/components/ui/progress/progress.svelte";
+   import NumberInput from "$lib/comps/personalize-comp/NumberInput.svelte";
+   import TextInput from "$lib/comps/personalize-comp/textInput.svelte";
+   import { onMount } from "svelte";
+   import { Search } from 'lucide-svelte';
 
-    // save all data to this JS object pass into model.py
-    let scheduleData = {
-        gpa: 0
-    }
+   // save all data to this JS object pass into model.py
+   let courseData = {
+       gpa: 0,
+       course: ""
+   }
 
-    // color for text to be reactive dependent on calculated percent 
-    let successPercent: number = 10 // 30 placeholder for now
-    
-    // script for the success bar
-    let value = $state(0);
-    onMount(() => {
-        const timer = setTimeout(() => (value = successPercent), 500);
-        return () => clearTimeout(timer);
-    });
+   // color for text to be reactive dependent on calculated percent 
+   let successPercent: number = 10 // 30 placeholder for now
+   
+   // script for the success bar
+   let value = $state(0);
+   onMount(() => {
+       const timer = setTimeout(() => (value = successPercent), 500);
+       return () => clearTimeout(timer);
+   });
 
+
+   // send course data to scheduler endpoint
+   async function sendCourseData(){
+     try {
+        const response = await fetch("http://127.0.0.1:5000/auth/course_retriever",
+           {
+              method: "POST",
+              headers: {
+                 "Content-Type": "application/json",
+                 "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+              },
+              // always include cookies for Flask's login/session based authentication
+              credentials: "include",
+
+              //payload/data to send to flask endpoint
+              body: JSON.stringify(courseData)
+           }
+        )
+        // display error here later to user
+        if (!response.ok){
+           throw new Error(`HTTP error. Status ${response.status}`)
+        }
+        else if (response.ok){
+           const allCourseData = await response.json()
+        }
+     }
+     catch(error){
+        console.error(`Failed to retrieve course data from data.json: ${error}`)
+     }
+   }
 
 </script>
-    <div class="grid grid-cols-1 lg:grid-cols-2 px-5">
+  <!-- Main content sections - use flex-col to stack them without extra padding -->
+  <div class="flex flex-col space-y-6">
+    <!-- Course selection section -->
+    <div class="rounded-lg shadow-md shadow-stone-200 p-6">
+       <h1 class="font-semibold text-lg">
+        Course Selection
+           </h1>
+     <hr class="straight-line w-90 mx-auto my-2 bg-gray-200 border-0 md:my-2 dark:bg-zinc-900">
+     <NumberInput
+        inputHeader="Last Term's GPA"
+        customStep={0.1}
+        textStyling="mt-5 text-medium"
+        studentInput={courseData.gpa}
+     />
 
-        <div class="flex flex-col items-center">
+     <!-- Find courses via search bar  -->
+     <div class="flex grow justify-between">
+        <TextInput 
+        inputHeader="Search Courses by Course Code and Number"
+        inputPlaceholder="CS171"
+        textStyling="md:mt-2 lg:mt-3 xl:mt-3 text-medium sm:text-lg w-full mr-2"
+        studentInput={courseData.course}
+        />
 
-            <!-- For the Model to process and grab data like CRN and GPA -->
-            <p class="font-medium text-center text-lg">Last term's GPA</p>
-            <label class="input input-bordered flex items-center h-8 mb-5">
-            <input bind:value={scheduleData.gpa} type="number" class="grow" placeholder="" />
-            </label>
+        <!--Sends course data moment button is clicked -->
+        <button onclick={sendCourseData}>
+           <Search class="mb-7 ml-5"/>
+              </button>
 
-            <h1 class="font-medium text-lg mb-3">
-                Choose a course for the term
-            </h1>
-            <CourseDropdown />
-        </div>
+        <!--Display course cards when button is clicked -->
 
-        <div class="flex flex-col content-center mt-12 lg:mt-0">
-            <h1 class="font-medium text-center text-lg mb-3">
-               Put into current term?
-            </h1>
+           </div>
+   
 
-            <div class="flex">
-                <button class="text-stone-100 text-lg
-                bg-emerald-400 hover:bg-emerald-300 font-semibold px-6
-                 py-3 rounded-3xl m-auto">
-                   Confirm
-               </button>
-               <button class="text-stone-100 text-lg
-                font-semibold px-6 bg-red-500 hover:bg-red-400
-                 py-3 rounded-3xl m-auto">
-                    Cancel
-               </button>
-            </div>
-    
-
-        </div>
-        
+     <!-- Courses searched will appear here-->
+       
+   </div>
+    <!-- Schedule section -->
+    <div class="rounded-lg shadow-md shadow-stone-200 p-6">
+       <h1>Current Schedule</h1>
     </div>
-
-    <!-- Bottom section of ML-model page-->
-    <div class="flex flex-col justify-center mt-10">
-        <h1 class="font-medium mt-5 text-3xl text-center">
-            Based off our AI model you have
-        </h1>
-        <Progress {value} max={100} class="w-[75%] block m-auto mt-3 mb-5"/>
-        <h1 class="text-center text-lg">
-            <p class="inline-block">
-                {successPercent}%
-            </p> 
-        chance of succeeding
-        </h1>
+    <!-- Recommendation section -->
+    <div class="rounded-lg shadow-md shadow-stone-200 p-6">
+       <h1>Input Your Interests</h1>
     </div>
+   </div>
+
 
 <style>
-
+.straight-line{
+  height: 2.5px;
+}
 
 </style>

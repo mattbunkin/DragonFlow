@@ -1,10 +1,10 @@
 <script lang="ts">
-    let {inputHeader, inputPlaceholder, studentInput = $bindable() } = $props();
+    let {inputHeader, inputPlaceholder, textStyling, studentInput = $bindable() } = $props();
     import { Asterisk } from "lucide-svelte";
 </script>
 
 <!-- input header -->
-<p class="font-semibold text-lg mb-2 text-zinc-700">
+<p class="{textStyling} text-zinc-700">
     {inputHeader} <Asterisk class="inline-block text-red-500"/>
 </p>
 

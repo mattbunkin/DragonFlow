@@ -1,5 +1,5 @@
- <script>
-    let {inputHeader, customStep, studentInput = $bindable() } = $props();
+<script lang="ts">
+    let {inputHeader, customStep, textStyling, studentInput = $bindable() } = $props();
     import { Asterisk } from "lucide-svelte";
 
     // stops negative numbers from being inputted
@@ -7,12 +7,15 @@
         if (studentInput < 0){
             studentInput = 0;
         }
+        if (typeof studentInput != "number"){
+            studentInput = 0;
+        }
     }
 
 </script>
  
  <!-- header above the numerical input text box -->
-<p class="font-semibold text-lg mb-2 text-zinc-700">
+<p class="{textStyling} text-zinc-700">
     {inputHeader} <Asterisk class="inline-block text-red-500"/>
 </p>
 
