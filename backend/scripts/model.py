@@ -10,12 +10,14 @@ from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, classification_report
 
 load_dotenv()
-DATA_FILE = os.getenv("DATA_FILE")
+# DATA_FILE = os.getenv("DATA_FILE")
+# DATA_FILE = os.getenv("/scripts/course_data.json")
 
+# # Load the course data
+# with open(DATA_FILE, 'r') as f:
+#     courses = json.load(f)
 
-# Load the course data
-with open(DATA_FILE, 'r') as f:
-    courses = json.load(f)
+data = pd.read_json('scripts/course_data.json')
 
 # Feature extraction functions
 def extract_course_level(course_number):
@@ -32,15 +34,17 @@ def extract_credits(credit_str):
 
 # Parse course features
 course_features = []
-for crn, details in courses.items():
+for crn, details in data.items():
     course_number = details.get('course_number', '')
     course_level = extract_course_level(course_number)
     credits = extract_credits(details.get('credits', '0'))
     has_prereqs = 1 if details.get('prereqs', '').strip() else 0
     instruction_type = details.get('instruction_type', 'Other').split('/')[0].strip()
+    max_enroll = details.get('max_enroll', '0')
+    enrollment = int(max_enroll) if max_enroll.isdigit() else 0
 
     # Calculate course difficulty based on level, credits, and prerequisites
-    course_difficulty = (course_level * 0.4) + (credits * 0.3) + (has_prereqs * 0.3)
+    course_difficulty = (credits * 0.5) + (has_prereqs * 0.3)
 
     course_features.append({
         'crn': str(crn),
@@ -48,6 +52,7 @@ for crn, details in courses.items():
         'credits': credits,
         'has_prereqs': has_prereqs,
         'instruction_type': instruction_type,
+        'enrollment': enrollment,
         'course_difficulty': course_difficulty  # Realistic difficulty score
     })
 
@@ -81,6 +86,7 @@ for _, course in courses_df.iterrows():
             'has_prereqs': course['has_prereqs'],
             'instruction_type': course['instruction_type'],
             'course_difficulty': course['course_difficulty'],
+            'enrollment': course['enrollment'],
             'success': success
         })
 
@@ -135,7 +141,8 @@ def predict_success_probability(gpa, crn):
         'credits': course_info['credits'],
         'has_prereqs': course_info['has_prereqs'],
         'instruction_type': course_info['instruction_type'],
-        'course_difficulty': course_info['course_difficulty']
+        'course_difficulty': course_info['course_difficulty'],
+        'enrollment': course_info['enrollment']
     }
     
     # Store input data in a dataframe so it can be processed smoothly
