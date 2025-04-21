@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import numpy as np
 from dotenv import load_dotenv
 import pandas as pd
@@ -10,14 +11,40 @@ from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, classification_report
 
 load_dotenv()
-# DATA_FILE = os.getenv("DATA_FILE")
-# DATA_FILE = os.getenv("/scripts/course_data.json")
+DATA_FILE = os.getenv("DATA_FILE")
+DATA_FILE = os.getenv("/scripts/course_data.json")
 
-# # Load the course data
-# with open(DATA_FILE, 'r') as f:
-#     courses = json.load(f)
+# Load the course data
+with open(DATA_FILE, 'r') as f:
+    courses = json.load(f)
 
 data = pd.read_json('scripts/course_data.json')
+
+def fetchProfRating(professor_name):
+    """
+    Fetches the rating of a professor from RateMyProfessors using a Node.js script.
+    """
+    # Ensure the Node.js script is in the correct path
+    try:
+        js_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rmp", "rmp-api","rmp-data", "getRating.js"))
+        
+        #runs the Node.js script with the professor name as an argument
+        result = subprocess.run(
+            ["node", js_path, professor_name],
+            capture_output=True,
+            text=True
+        )
+        #returns the output of the script as a JSON object
+        output = json.loads(result.stdout)
+        return output.get("rating")
+    
+    #throws an error if the script fails to run or if the output is not valid JSON
+    except Exception as e:
+        print(f"Error fetching RMP rating: {e}")
+        return None
+
+
+
 
 # Feature extraction functions
 def extract_course_level(course_number):
