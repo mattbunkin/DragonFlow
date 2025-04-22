@@ -1,4 +1,6 @@
 import os 
+import json
+import subprocess
 from dotenv import load_dotenv
 from scripts import model
 from scripts import prereqs
@@ -21,7 +23,7 @@ import logging #will give us better errors printed in the console
 # load in course data 
 load_dotenv()
 COURSE_DATA = os.environ.get("DATA_FILE")
-
+RMP_PATH = os.environ.get("RMP_PATH")
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -80,18 +82,17 @@ def register():
             hashed_password=generate_password_hash(password),  
         )
 
+        db.session.add(new_user)
+        db.session.commit()
+
         # this will be sent to the frontend via dict struct: refer to tokens.py
         user_tokens = tokens.gen_store_tokens(new_user.pid) # crucial as will make token identity same as primary keys
         
         if user_tokens is None:
+            db.session.rollback()
             return jsonify({"msg": "error generating user tokens"}), 500 # server error
 
-        db.session.add(new_user)
-        db.session.commit()
-
-        return jsonify({
-            user_tokens
-        }), 200
+        return jsonify(user_tokens), 200
     
     except Exception as e:
         db.session.rollback() #the session is rolled back in case of an error.
@@ -285,7 +286,48 @@ def personalize_account():
             "msg": "Could not save student data to db", 
             "error": str(e)
         }), 500
-@auth.route("/course-retriever")
+    
+# proxy flask get my professor api -- documentation soon.
+@auth.route('/professor-rating', methods=['GET', 'OPTIONS'])
+def get_professor_rating():
+     # Handle preflight requests for CORS
+    if request.method == 'OPTIONS':
+        response = jsonify({"message": "preflight"})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,OPTIONS')
+        return response
+        
+    professor_name = request.args.get('name')
+    
+    if not professor_name:
+        return jsonify({"error": "Professor name is required"}), 400
+    
+    try:
+        # Use the new script path
+        script_path = RMP_PATH
+        cmd = ["node", script_path, professor_name]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            return jsonify({"error": "Failed to fetch professor data", "details": result.stderr}), 500
+            
+        try:
+            data = json.loads(result.stdout)
+            return jsonify(data)
+        
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {e}")
+            return jsonify({"error": "Invalid response from RMP API", "output": result.stdout}), 500
+    
+    except Exception as e:
+        logger.error(f"Exception in professor-rating: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# basic endpoint no authentication quite yet   
+@auth.route("/course-retriever", methods=["GET", "POST"])
 def course_retriever():
     """
     ### Endpoint that gets data to check if course exists
@@ -296,9 +338,10 @@ def course_retriever():
     if not found.
     """
     # get data from user search
-    data = request.get_data()
-    gpa = data["gpa"]
-    course = data["course"]
+    data = request.get_json()
+
+    gpa = data.get("gpa")
+    course = data.get("course")
 
     try:
         # get one course's entire CRN for the quarter 
@@ -308,12 +351,12 @@ def course_retriever():
         # get model to calculate probability 
         try:
             gpa = float(gpa)
-            course_crn = course_crns[0]
+            course_crn = str(course_crns[0])
             probability = model.predict_success_probability(gpa, course_crn)
             # return list of dicts back to frontend
             return jsonify({
                 "course_data": course_info,
-                "probability_score": 0
+                "probability_score": int(probability * 100)
             }), 200
 
         # error if type or crn is not found

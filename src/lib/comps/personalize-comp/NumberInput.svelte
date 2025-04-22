@@ -4,10 +4,7 @@
 
     // stops negative numbers from being inputted
     function handleInput(){
-        if (studentInput < 0){
-            studentInput = 0;
-        }
-        if (typeof studentInput != "number"){
+        if (studentInput < 0 ){
             studentInput = 0;
         }
     }

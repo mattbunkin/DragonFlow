@@ -156,9 +156,6 @@ model.fit(X_train, y_train)
 # Evaluate model based on accuracy and F1-score
 y_test_pred = model.predict(X_test)
 test_accuracy = accuracy_score(y_test, y_test_pred) * 100
-print(f"Model Accuracy: {test_accuracy:.2f}%")
-print("\nClassification Report:")
-print(classification_report(y_test, y_test_pred))
 
 # Function to predict success probability
 def predict_success_probability(gpa, crn):
@@ -194,14 +191,18 @@ def predict_success_probability(gpa, crn):
     return success_probability
 
 # User input of GPA and CRN to be calculated and predicted
-try:
-    user_gpa = float(input("Enter your GPA: "))
-    user_crn = input("Enter the CRN: ")
-    probability = predict_success_probability(user_gpa, user_crn)
-    if isinstance(probability, float):
-        print(f"Probability of success: {probability * 100:.2f}%")
-    else:
-        print(probability)
-except ValueError:
-    print("Invalid input. Please enter a valid GPA.")
+if __name__ == "__main__":
+    print(f"Model Accuracy: {test_accuracy:.2f}%")
+    print("\nClassification Report:")
+    print(classification_report(y_test, y_test_pred))
+    try:
+        user_gpa = float(input("Enter your GPA: "))
+        user_crn = input("Enter the CRN: ")
+        probability = predict_success_probability(user_gpa, user_crn)
+        if isinstance(probability, float):
+            print(f"Probability of success: {probability * 100:.2f}%")
+        else:
+            print(probability)
+    except ValueError:
+        print("Invalid input. Please enter a valid GPA.")
 

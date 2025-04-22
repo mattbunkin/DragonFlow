@@ -30,6 +30,7 @@ declare module '$env/static/private' {
 	export const DATABASE_URL: string;
 	export const DATA_FILE: string;
 	export const SECRET_KEY: string;
+	export const RMP_PATH: string;
 	export const ELECTRON_RUN_AS_NODE: string;
 	export const COMMAND_MODE: string;
 	export const HOME: string;
@@ -106,6 +107,7 @@ declare module '$env/dynamic/private' {
 		DATABASE_URL: string;
 		DATA_FILE: string;
 		SECRET_KEY: string;
+		RMP_PATH: string;
 		ELECTRON_RUN_AS_NODE: string;
 		COMMAND_MODE: string;
 		HOME: string;

@@ -441,8 +441,10 @@ if __name__ == "__main__":
     for course in test_cases:
         print(f"pre-req test case: {course}\nSatisfies: {can_take_course("CS277", course, all_course_pre_reqs)}\n")
     # example usage
-    course_crns = get_course_crn(course_name="CS3000")
+    course_crns = get_course_crn(course_name="CS172", find_all=True)
     print(course_crns)
+
+    # only use method for crns list not string of a crn
     course_info = get_crns_info(course_crns)
     for course in course_info:
         print(f"Course info:\n{course}\n")

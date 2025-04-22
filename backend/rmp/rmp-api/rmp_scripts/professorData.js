@@ -1,6 +1,6 @@
 const rmp = require("ratemyprofessor-api");
 
-// helper function to get professor info
+// Helper function to get professor info
 async function getProfessorInfo(profName) {
   try {
     const schoolSearchResults = await rmp.searchSchool("Drexel University");
@@ -16,7 +16,6 @@ async function getProfessorInfo(profName) {
       return { error: "Professor not found" };
     }
     
-    // return data into structured json object 
     return {
       avgRating: data.avgRating || 0,
       link: data.link || "",
@@ -27,10 +26,9 @@ async function getProfessorInfo(profName) {
   }
 }
 
-// get professor name from command line arguments
+// Get professor name from command line arguments
 const professorName = process.argv[2];
 
-// for flask to process API
 if (professorName) {
   getProfessorInfo(professorName)
     .then(result => {

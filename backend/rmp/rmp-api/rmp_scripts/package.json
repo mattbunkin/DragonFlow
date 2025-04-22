@@ -1,0 +1,10 @@
+{
+  "name": "rmp-scripts",
+  "version": "1.0.0",
+  "description": "Rate My Professor Scripts",
+  "main": "professorData.js",
+  "type": "commonjs",
+  "dependencies": {
+    "ratemyprofessor-api": "^1.0.1"
+  }
+}
