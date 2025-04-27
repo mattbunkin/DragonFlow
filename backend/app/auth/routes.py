@@ -33,6 +33,10 @@ logger = logging.getLogger(__name__)
 # create blueprint
 auth = Blueprint("auth", __name__)
 
+#open open the course data file and load it into a variable
+with open(COURSE_DATA) as f:
+    course_data = json.load(f)
+    
 @login_manager.user_loader
 def load_user(pid):
     return User.query.get(int(pid)) #Converts the pid (primary_key) to an integer and fetches the user from the database
@@ -374,4 +378,103 @@ def course_retriever():
         }), 400
 
 
+@auth.route("/get-interests", methods=["GET", "POST"])
+def get_interests():
+    """
+    API endpoint to filter courses based on user preferences.
+    Accepts JSON input with filtering criteria and returns matching course CRNs.
+    """
+    
+    # ====================== REQUEST VALIDATION ======================
+    # Check if the request contains JSON data
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400  # 400 = Bad Request
 
+    # Parse the JSON data from the request
+    data = request.get_json()
+    
+    # Check if any data was provided
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+
+    # Get filter parameters with None as default if not provided
+    class_time = data.get("class_time")         # Expected: "Morning", "Afternoon", "Evening"
+    class_size = data.get("class_size")        # Expected: "Small", "Large"
+    class_difficulty = data.get("class_difficulty")  # Placeholder for future use (RMP)
+    instruction_type = data.get("instruction_type")  # Expected: "Online", "In Person"
+
+    matching_crns = []
+
+    # ====================== COURSE FILTERING LOGIC ======================
+    # Iterate through all courses in course_data (key=CRN, value=course details)
+    for crn, course in course_data.items():
+        match = True  # Start by assuming the course matches all criteria
+
+        # --------------------- CLASS TIME FILTER ---------------------
+        if class_time:  # Only apply filter if class_time was specified
+            start_time = course.get('start_time')
+            
+            # If course has no start time, exclude it
+            if not start_time:
+                match = False
+            else:
+                try:
+                    # Extract the hour from start time (format "HH:MM")
+                    start_hour = int(start_time.split(":")[0])
+                    
+                    # Check against time categories
+                    if class_time == "Morning" and not (8 <= start_hour < 12):
+                        match = False
+                    elif class_time == "Afternoon" and not (12 <= start_hour < 16):
+                        match = False
+                    elif class_time == "Evening" and not (16 <= start_hour <= 22):
+                        match = False
+                except (ValueError, AttributeError):
+                    match = False # Handle invalid time format or missing data
+        
+        # --------------------- CLASS SIZE FILTER ---------------------
+        # Only check size if previous filters haven't disqualified the course
+        if match and class_size:
+            size = course.get('max_enroll')
+            
+            if not size:  # No enrollment data available
+                match = False
+            else:
+                try:
+                    size = int(size)  # Convert to integer
+                    
+                    # Apply size thresholds
+                    if class_size == "Large" and size <= 50:
+                        match = False  # Not large enough
+                    elif class_size == "Small" and size > 50:
+                        match = False  # Too large
+                except ValueError:
+                    # Handle invalid size data
+                    match = False
+        
+        # --------------------- INSTRUCTION TYPE FILTER ---------------------
+        if match and instruction_type:
+            # Normalize strings for case-insensitive comparison
+            instruction_method = course.get('instruction_method', '').lower()
+            requested_type = instruction_type.lower()
+            
+            # Check instruction method matches request
+            if requested_type == "online" and instruction_method != "online-asynchronous":
+                match = False
+            elif requested_type == "in person" and instruction_method != "face to face":
+                match = False
+        
+        # --------------------- CLASS DIFFICULTY (PLACEHOLDER) ---------------------
+        if match and class_difficulty:
+            # Future implementation point for difficulty filtering
+            pass  # Currently does nothing
+
+        # If all active filters were passed, add to results
+        if match:
+            matching_crns.append(crn)  # Store the matching course's CRN
+            
+    # Return matching CRNs as JSON response
+    return jsonify({
+        "matching_courses": matching_crns,
+        "count": len(matching_crns) #include count of course matches (maybe useful for frontend)
+    })
