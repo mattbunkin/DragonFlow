@@ -1,0 +1,63 @@
+<script>
+    let interest = "";
+  
+    function handleSubmit() {
+      alert(`Student Interest Submitted: ${interest}`);
+      interest = "";
+    }
+  </script>
+  
+  <div class="container">
+    <h2>Student Interest Form</h2>
+    <input
+      type="text"
+      bind:value={interest}
+      placeholder="Enter your interest for the class..."
+      class="input-box"
+    />
+    <button on:click={handleSubmit} class="submit-button">
+      Submit
+    </button>
+  </div>
+  
+  <style>
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+  
+    h2 {
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+  
+    .input-box {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+  
+    .submit-button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+  
+    .submit-button:hover {
+      background-color: #45a049;
+    }
+  </style>
