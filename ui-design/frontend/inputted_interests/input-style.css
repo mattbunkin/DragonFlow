@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+body {
+    background-color: #f7f8fa;
+    color: #444;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    font-size: 16px;
+    padding-top: 40px;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 90%;
+    max-width: 650px;
+    font-size: 18px;
+    margin-top: 30px;
+}
+
+h2 {
+    text-align: center;
+    color: #0066cc;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+p {
+    text-align: center;
+    color: #666;
+    font-weight: 300;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.dropdown-group, .checkbox-group {
+    margin-bottom: 30px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #444;
+}
+
+select, input[type="checkbox"] {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    margin: 5px 0 20px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+}
+
+select:focus, input[type="checkbox"]:focus {
+    border-color: #007BFF;
+    outline: none;
+}
+
+select option {
+    font-size: 16px;
+}
+
+select option:disabled {
+    color: #888;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+}
+
+.checkbox-group h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+button.generate-list-btn {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s ease-in-out;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+button.generate-list-btn:hover {
+    background-color: #0056b3;
+}
+
+#results {
+    margin-top: 40px;
+    text-align: center;
+}
+
+#crnList {
+    list-style-type: none;
+    padding: 0;
+}
+
+#crnList li {
+    background-color: #e9f7fd;
+    margin: 10px 0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease-in-out;
+}
+
+#crnList li:hover {
+    background-color: #d0e7f9;
+}
+
+button.generate-list-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 30px;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    button.generate-list-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
