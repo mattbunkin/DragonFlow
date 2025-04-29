@@ -7,7 +7,7 @@
     let options: string[] = ["Fall 24-25", "Winter 24-25", "Spring 24-25", "Summer 24-25"];
     let viewOptions: string[] = ["List View", "Calendar View"];
     // track selected values
-    let selectedQuarter = $state("Fall 24-25");
+    let selectedTerm = $state("Fall 24-25");
     let selectedView = $state("List View");
   </script>
   
@@ -37,7 +37,7 @@
          dropDownSubHeader="Select Your Quarter"
          dropDownOptions={options}
          styling="w-[180px] h-[40px]"
-         bind:selected={selectedQuarter}
+         bind:selected={selectedTerm}
        />
        <CustomDropdown
          dropDownHeader={"List View"}

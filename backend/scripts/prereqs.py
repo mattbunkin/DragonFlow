@@ -150,7 +150,8 @@ def traverse_pre_reqs(parsed_nested_pre_reqs: list, all_course_pre_reqs: dict) -
 def can_take_course(
         course_to_check: str, 
         completed_courses: list, 
-        all_course_pre_reqs: dict) -> bool:
+        all_course_pre_reqs: dict
+    ) -> bool:
     """
     ### Determine if a student can take a course based on completed courses and pre-reqs.
     helper function that will be used for the main recursive algorithm that will determine 

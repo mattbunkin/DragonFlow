@@ -1,5 +1,6 @@
 <script lang="ts">
    import Progress from "$lib/components/ui/progress/progress.svelte";
+    import CustomDropdown from "$lib/comps/algo-comp/CustomDropdown.svelte";
    import NumberInput from "$lib/comps/personalize-comp/NumberInput.svelte";
    import TextInput from "$lib/comps/personalize-comp/textInput.svelte";
    import { ExternalLink } from 'lucide-svelte';
@@ -8,15 +9,17 @@
    import { Meh } from 'lucide-svelte';
    import { ThumbsUp } from 'lucide-svelte';
    import { ThumbsDown } from 'lucide-svelte';
+   import { CalendarCog } from 'lucide-svelte';
 
 
    // save all data to this JS object pass into model.py
    interface Instructor {
       name: string
-   }
+   };
+
    interface Days {
       day: string
-   }
+   };
    
    // define explicit types for the course object 
    interface Course {
@@ -31,6 +34,7 @@
       instruction_type: string;
       start_time: string;
       end_time: string;
+      credits: string;
    }
 
    // Define interface for RMP data
@@ -38,27 +42,70 @@
     avgRating: number;
     link: string;
     department: string;
-  }
+  };
   
   // Store professor ratings
   let professorRatings = $state<Record<string, RMPData>>({});
   
-
    // data to send to flask api with default values
    let courseData = {
        gpa: 0,
        course: ""
+   };
+
+   // interests input
+   let interests = {
+      class_time: ["early", "afternoon", "evening"],
+      class_size: 0,
+      class_difficulty: 0,
+      instruction_type : ["online", "in_person"],
    }
 
    // store response data from API
    let courseSlots = $state<Course[]>([]);
    let successPercent = $state<number>(1) 
+   let userSchedule = $state<Course[]>([]);
 
    // track if loading data
    let isLoading = $state(false)
 
       // Create a derived value for display (so it reacts to successPercent changes)
    let progressValue = $derived(successPercent);
+
+   
+   function removeCourse(crn: number){
+      return function(){
+         userSchedule = userSchedule.filter(course => course.crn !== crn)
+      }
+   }
+
+   function isCourseAlreadyAdded(crn: number, course_title: string): boolean {
+      return userSchedule.some(course => course.crn === crn || course.course_title === course_title);
+   }
+
+   function addCourse(course: Course) {
+      return function() {
+         // Check if course is already added before adding it
+         if (!isCourseAlreadyAdded(course.crn, course.course_title)) {
+            userSchedule = [...userSchedule, course];
+         } else {
+            // Optionally show an alert or some notification
+            alert("Can't add the same course twice!");
+         }
+      }
+   }
+
+
+   // helper function transform military time to regular time
+   function militaryToRegular(militaryTime: string): string {
+      const [hours, minutes] = militaryTime.split(':').map(Number);
+
+      const period = hours < 12 || hours === 24 ? 'AM' : 'PM';
+      const regularHours = hours % 12 === 0 ? 12 : hours % 12;
+      const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+      return `${regularHours}:${formattedMinutes} ${period}`;
+   }
 
 
    // send course data to scheduler endpoint
@@ -106,8 +153,6 @@
          if (responseData.course_data) {
             courseSlots = responseData.course_data
             successPercent = responseData.probability_score
-
-            console.log("Set prob to:", successPercent)
                
          }
          // set empty if other error
@@ -143,7 +188,58 @@
       return null;
     }
   }
+
+  // save user schedule to data base 
+  async function sendSchedule(){
+      try {
+         isLoading = true;
+
+         const dataToSend = {
+            "schedule": userSchedule,
+            // dummy variable will actually add term later
+            "term_id": "Fall-24-25"
+         }
+
+         const response = await fetch("http://127.0.0.1:5000/auth/schedule-saver",
+            {
+               method: "POST",
+               headers: {
+                 "Content-Type": "application/json",
+               //   "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+              },
+              // always include cookies for Flask's login/session based authentication
+              credentials: "include",
+
+              //payload/data to send to flask endpoint
+              body: JSON.stringify(dataToSend)
+            }
+         )
+         if (!response.ok){
+            const errorText = await response.text()
+            console.error(`API Error Response: ${errorText}`)
+
+            userSchedule = []
+            throw new Error(`HTTP error. Status ${response.status}`)
+         }
+         
+         // if data was received successfully 
+         else if (response.ok){
+            const responseData = await response.json()
+         }
+      }
+
+      // final error check
+      catch(error){
+         console.error(`Failed to even send data to flask. ${error}`)
+      }
+
+      finally {
+         isLoading = false;
+      }
+   }
+
   
+
   // Load professor ratings when course data changes; reactive once courseSlots var filled
   $effect(() => {
     if (courseSlots.length > 0) {
@@ -197,7 +293,7 @@
          disabled={isLoading}
         >
         {#if isLoading}
-            <span class="animate-pulse">Loading...</span>
+            <span class="animate-pulse ml-2 text-center">Loading...</span>
          {:else}
            <Search class="mb-7 ml-5"/>
          {/if}
@@ -266,9 +362,6 @@
                         {professorRatings[(course.instructors)[0].name].avgRating.toFixed(2)} <ThumbsDown class="inline-block"/>
                      </span>
                      {/if}
-                     <p>
-                        
-                     </p>
 
                      <!--Link to direct to professor-->
                      <a 
@@ -291,15 +384,20 @@
                {/if}
             </div>
 
-            <div class="flex items-center justify-between w-full mt-1">
-               <Progress value={progressValue} max={100} class="w-[90%] mt-3 inline-block"/>
-               <p class="inline-block text-sm">
-                  {progressValue}%
-               </p>
-            </div>
-              
-      
+            <!-- Progress bar and button component for card-->
+            <div class="flex items-center w-full mt-1">
+               <Progress value={progressValue} max={100} class="w-[70%]" />
+               <p class="ml-2 text-sm">{progressValue}%</p>
+               <div class="flex-grow"></div>
 
+               <button class="react bg-gradient-to-r
+                  from-emerald-300 to-emerald-400 text-stone-100 text-sm
+                   px-3 py-1 rounded-3xl block m-auto font-normal" 
+                  onclick={addCourse(course)}>
+                  Add
+               </button>
+             </div>
+              
           </div>
 
         {/each}
@@ -325,9 +423,130 @@
    </div>
 
     <!-- Schedule section -->
-    <div class="rounded-lg shadow-md shadow-stone-200 p-6">
-       <h1>Current Schedule</h1>
+    <div class="rounded-lg shadow-md shadow-stone-200 p-4">
+      <!--Title of schedule section-->
+      <h1 class="font-semibold text-lg">
+         Current Schedule 
+       </h1>
+       <hr class="straight-line w-90 mx-auto my-2 bg-gray-200 border-0 md:my-2 dark:bg-zinc-900">
+
+         <div class="flex items-center justify-between h-[30px] max-h-[400px] p-5 mt-1 bg-gray-100">
+            <div>
+               <p class="text-black text-sm font-medium text-opacity-60">Course & Professor</p>
+            </div>
+            <div>
+               <p class="text-black text-sm font-medium text-opacity-60">Time</p>
+            </div>
+            <div>
+               <p class="text-black text-sm font-medium text-opacity-60">Day</p>
+            </div>
+            <div>
+               <p class="text-black text-sm font-medium text-opacity-60">CRN</p>
+            </div>
+            <div>
+               <p class="text-black text-sm font-medium text-opacity-60">Add/Remove</p>
+            </div>
+         </div>
+         <hr class="straight-line w-90 mx-auto bg-gray-200 border-0 dark:bg-zinc-900">
+
+         <!--If the user actually has courses added-->
+         {#if userSchedule.length > 0}
+
+         <!--Course Card Component - Add max height and overflow-y-auto here-->
+         <div class="">
+            {#each userSchedule as course, i}
+               <div class="flex items-center justify-between w-full max-w-screen h-[100px] max-h-[120px] overflow-y-auto overflow-x-auto p-4 text-lg border shadow-sm mb-3 sm:mb-0">
+                  <!--Small course section-->
+                  
+                  <!--Course title and subject name-->
+                  <div class="mr-6 sm:mr-1">
+                     <h3 class="font-medium">
+                        {course.subject_code + course.course_number || `Course ${i+1}`}
+                        <br>
+                        <!--The actual course title-->
+                        <p class="font-normal text-sm text-black text-opacity-75">
+                        {course.course_title}
+                        </p>
+
+                        <p class="font-normal text-sm">
+                           {((course.instructors)[0].name) || 'Course Professor'}
+                           <a
+                           href={`https://www.ratemyprofessors.com/search/teachers?query=${encodeURIComponent((course.instructors)[0].name)}`}
+                           target="_blank"
+                           class="text-black text-opacity-75"
+                           rel="noopener noreferrer">
+                           <ExternalLink class="text-blue-500 text-opacity-80 ml-1 w-4 h-4 inline-block"/>
+                           </a>
+                        </p>
+                     </h3>
+                  </div>
+
+                  
+               <!--Time slots of course: turn military time to regular time-->
+               <div class="mr-6 sm:mr-0">
+                  <h3 class="text-black text-opacity-75 font-normal text-sm">
+                     {militaryToRegular(course.start_time)}
+                     - {militaryToRegular(course.end_time)}
+                  </h3>
+               </div>
+               
+               <div class="mr-6 sm:mr-0">
+                  <!--Days course is available-->
+                  <p class="text-black text-opacity-70 text-sm">
+                     {course.instruction_type}:
+                     <br>
+                     <!--could have a course with multiple days -->
+                     {#each course.days as day}
+                     <!-- add space between days if more than one day-->
+                     {#if course.days.length > 1}
+                        {`${day} `}
+                     {:else}
+                        {day}
+                     {/if}
+                     {/each}
+                  </p>
+               </div>
+
+                  <div class="mr-6 sm:mr-3">
+                     <!--Final info of course user selected: course CRN-->
+                     <h3 class="font-medium">
+                        {course.crn || 'Course CRN'}
+                     </h3>
+                  </div>
+                  
+                  <!--Final column to remove/keep-->
+                  <div>
+                     <button class="react bg-gradient-to-r
+                     from-red-400 to-red-500 text-stone-100 text-base
+                     px-3 py-1 rounded-3xl block m-auto font-normal" 
+                     onclick={removeCourse(course.crn)}>
+                     Remove
+                  </button>
+                  </div>
+               
+               </div>
+            {/each}
+
+            <!-- Button that sends user's actual schedule data -->
+            <button class="glow bg-gradient-to-r
+               from-sky-400 to-sky-500 text-stone-100 text-base
+               px-4 py-2 rounded-3xl block m-auto mt-4 font-normal" 
+               onclick={sendSchedule}>
+               Save Schedule
+            </button>
+         </div>
+         
+         <!--User has no courses saved-->
+         {:else if userSchedule.length == 0}
+            <p class="text-center text-black text-opacity-90 text-lg font-light mt-6">
+               Add some courses to your schedule!
+            </p>
+            <CalendarCog class="text-zinc-900 text-opacity-75 m-auto text-2xl mt-2"/>
+         {/if}
     </div>
+
+    
+
     <!-- Recommendation section -->
     <div class="rounded-lg shadow-md shadow-stone-200 p-6">
        <h1>Input Your Interests</h1>
@@ -339,5 +558,26 @@
 .straight-line{
   height: 2.5px;
 }
+
+.react {
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out;
+}
+.react:hover {
+    transform: scale(105%); 
+    transition: transform 0.3s ease-in-out;
+} 
+
+.glow {
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out;
+}
+.glow:hover {
+    box-shadow: 0 0 9px 2px rgba(102, 191, 255, 0.7);
+    transform: scale(105%); 
+    transition: transform 0.3s ease-in-out;
+} 
+
+
 
 </style>

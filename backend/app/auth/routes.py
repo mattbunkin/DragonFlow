@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from scripts import model
 from scripts import prereqs
 from app import db, login_manager
-from app.models import User, UserProgram
+from app.models import * 
 from app.utils import tokens
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
@@ -378,6 +378,7 @@ def course_retriever():
         }), 400
 
 
+
 @auth.route("/get-interests", methods=["GET", "POST"])
 def get_interests():
     """
@@ -478,3 +479,98 @@ def get_interests():
         "matching_courses": matching_crns,
         "count": len(matching_crns) #include count of course matches (maybe useful for frontend)
     })
+
+@auth.route("/schedule-saver", methods=["GET", "POST"])
+@jwt_required()
+def schedule_saver():
+    """
+    ### end point to allow the schedule the user has made in scheduler page to be saved in DB
+    """
+    # receive data from svelte
+    current_user_id = get_jwt_identity()
+    data = request.get_json()
+    schedule = data.get("schedule")
+    term_id = data.get("term_id")  # Assuming user selects a term
+
+    if not schedule or not term_id:
+        return jsonify({"error": "Missing required data"}), 400
+    
+    # Get or create user term plan
+    term_plan = UserTermPlanning.query.filter_by(
+        student_pid=current_user_id,
+        term_id=term_id
+    ).first()
+    
+    if not term_plan:
+        term_plan = UserTermPlanning(student_pid=current_user_id, term_id=term_id)
+        db.session.add(term_plan)
+        db.session.flush()
+    
+    # Process each course
+    for course_data in schedule:
+        # Get or create the course
+        course = Courses.query.filter_by(crn=course_data.get("crn")).first()
+        
+        if not course:
+            course = Courses(
+                subject_code=course_data.get("subject_code"),
+                course_number=course_data.get("course_number"),
+                course_title=course_data.get("course_title"),
+                crn=course_data.get("crn"),
+                credits=course_data.get("credits"),
+                instruction_type=course_data.get("instruction_type"),
+                start_time=course_data.get("start_time"),
+                end_time=course_data.get("end_time")
+            )
+            db.session.add(course)
+            db.session.flush()
+            
+            # Add instructors
+            for instructor_data in course_data.get("instructors", []):
+                instructor = Instructor.query.filter_by(name=instructor_data.get("name")).first()
+                if not instructor:
+                    instructor = Instructor(name=instructor_data.get("name"))
+                    db.session.add(instructor)
+                    db.session.flush()
+                
+                course_instructor = CourseInstructor(
+                    course_id=course.id,
+                    instructor_id=instructor.id
+                )
+                db.session.add(course_instructor)
+            
+            # Add days
+            for day_data in course_data.get("days", []):
+                day = Day.query.filter_by(name=day_data.get("day")).first()
+                if not day:
+                    day = Day(name=day_data.get("day"))
+                    db.session.add(day)
+                    db.session.flush()
+                
+                course_day = CourseDay(
+                    course_id=course.id,
+                    day_id=day.id
+                )
+                db.session.add(course_day)
+        
+        # Add course to user's term plan
+        user_term_course = UserTermCourse.query.filter_by(
+            term_plan_id=term_plan.id,
+            course_id=course.id
+        ).first()
+        
+        if not user_term_course:
+            user_term_course = UserTermCourse(
+                term_plan_id=term_plan.id,
+                course_id=course.id
+            )
+            db.session.add(user_term_course)
+    
+    try:
+        db.session.commit()
+        return jsonify({"msg": "Successfully saved schedule"}), 200
+    
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
