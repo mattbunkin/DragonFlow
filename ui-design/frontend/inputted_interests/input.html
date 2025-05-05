@@ -1,51 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inputted Interests</title>
+    <title>Input Your Interests</title>
     <link rel="stylesheet" href="input-style.css">
 </head>
+
 <body>
     <div class="container">
         <section class="interests">
             <h2>Input Your Interests</h2>
             <p>Everyone has different preferences. Our algorithms account for that. Whether it’s classes at a certain time frame or with a specific professor, we’ve got you covered.</p>
 
-            <div class="dropdown-group">
-                <label for="time">Preferred Time of Day</label>
-                <select id="time" name="time">
-                    <option value="" disabled selected>Select</option>
-                    <option value="morning">Morning (8 AM - 12 PM)</option>
-                    <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
-                    <option value="evening">Evening (4 PM - 10 PM)</option>
-                </select>
-            </div>
+            <form id="interestForm">
+                <div class="dropdown-group">
+                    <label for="time">Preferred Time of Day</label>
+                    <select id="time" name="time" required>
+                        <option value="" disabled selected>Select</option>
+                        <option value="morning">Morning (8 AM - 12 PM)</option>
+                        <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
+                        <option value="evening">Evening (4 PM - 10 PM)</option>
+                    </select>
+                </div>
 
-            <div class="dropdown-group">
-                <label for="size">Class Size</label>
-                <select id="size" name="size">
-                    <option value="" disabled selected>Select</option>
-                    <option value="small">Small (Under 25 students)</option>
-                    <option value="medium">Medium (25-50 students)</option>
-                    <option value="large">Large (50+ students)</option>
-                </select>
-            </div>
+                <div class="dropdown-group">
+                    <label for="size">Class Size</label>
+                    <select id="size" name="size" required>
+                        <option value="" disabled selected>Select</option>
+                        <option value="small">Small (Under 25 students)</option>
+                        <option value="medium">Medium (25-50 students)</option>
+                        <option value="large">Large (50+ students)</option>
+                    </select>
+                </div>
 
-            <div class="checkbox-group">
-                <h3>Instruction Type</h3>
-                <label><input type="checkbox" name="instruction" value="online"> Online</label><br>
-                <label><input type="checkbox" name="instruction" value="in-person"> In Person</label>
-            </div>
+                <div class="checkbox-group">
+                    <h3>Instruction Type</h3>
+                    <label><input type="checkbox" name="instruction" value="online"> Online</label><br>
+                    <label><input type="checkbox" name="instruction" value="in-person"> In Person</label>
+                </div>
 
-            <div class="checkbox-group">
-                <h3>Difficulty Level (Based On Success Probability)</h3>
-                <label><input type="checkbox" name="difficulty" value="hard"> Hard (< 50%)</label><br>
-                <label><input type="checkbox" name="difficulty" value="medium"> Medium (50% - 70%)</label><br>
-                <label><input type="checkbox" name="difficulty" value="easy"> Easy (> 75%)</label>
-            </div>
+                <div class="checkbox-group">
+                    <h3>Difficulty Level (Based On Success Probability)</h3>
+                    <label><input type="checkbox" name="difficulty" value="hard"> Hard (< 50%)</label><br>
+                    <label><input type="checkbox" name="difficulty" value="medium"> Medium (50% - 70%)</label><br>
+                    <label><input type="checkbox" name="difficulty" value="easy"> Easy (> 75%)</label>
+                </div>
 
-            <button type="button" class="generate-list-btn">Generate List</button>
+                <button type="button" class="generate-list-btn" onclick="generateSummary()">Generate List</button>
+            </form>
+
+            <div id="confirmation" class="confirmation" style="display:none;">
+                <h3>Summary of Your Selections:</h3>
+                <p id="summaryText"></p>
+                <button class="confirmation-btn" onclick="confirmSelections()">Confirm Selections</button>
+            </div>
         </section>
+    </div>
+
+    <script>
+        function generateSummary() {
+            const time = document.getElementById("time").value;
+            const size = document.getElementById("size").value;
+            const instructions = Array.from(document.querySelectorAll("input[name='instruction']:checked")).map(input => input.value).join(", ");
+            const difficulty = Array.from(document.querySelectorAll("input[name='difficulty']:checked")).map(input => input.value).join(", ");
+
+            let summaryText = `<strong>Preferred Time:</strong> ${time}<br>
+                               <strong>Class Size:</strong> ${size}<br>
+                               <strong>Instruction Type:</strong> ${instructions || 'None selected'}<br>
+                               <strong>Difficulty Level:</strong> ${difficulty || 'None selected'}`;
+
+            document.getElementById("summaryText").innerHTML = summaryText;
+            document.getElementById("confirmation").style.display = 'block';
+
+            document.getElementById("interestForm").style.display = 'none';
+        }
+
+        function confirmSelections() {
+            alert("Your selections have been confirmed!");
+        }
+    </script>
 </body>
+
 </html>
