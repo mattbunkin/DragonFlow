@@ -403,13 +403,34 @@ def get_interests():
     class_size = data.get("class_size")        # Expected: "Small", "Large"
     class_difficulty = data.get("class_difficulty")  # Placeholder for future use (RMP)
     instruction_type = data.get("instruction_type")  # Expected: "Online", "In Person"
+    preferred_course = data.get("preferred_course")  # Expected format: "CS172" or "UNIVCI101"
 
+    subject_match = course_number_match = None
+    
+    if preferred_course:
+        preferred_course = preferred_course.strip().upper()
+        
+        for i, char in enumerate(preferred_course):
+            if char.isdigit():
+                subject_match = preferred_course[:i]
+                course_number_match = preferred_course[i:]
+                break
+            
     matching_crns = []
 
     # ====================== COURSE FILTERING LOGIC ======================
     # Iterate through all courses in course_data (key=CRN, value=course details)
     for crn, course in course_data.items():
         match = True  # Start by assuming the course matches all criteria
+
+        # --------------------- COURSE CODE FILTER ---------------------
+        if preferred_course:
+            
+            subject = course.get("subject_code", "").upper()
+            number = course.get("course_number", "").upper()
+            
+            if subject != subject_match or number != course_number_match:
+                match = False
 
         # --------------------- CLASS TIME FILTER ---------------------
         if class_time:  # Only apply filter if class_time was specified
