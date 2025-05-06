@@ -1,6 +1,5 @@
 <script lang="ts">
    import Progress from "$lib/components/ui/progress/progress.svelte";
-    import CustomDropdown from "$lib/comps/algo-comp/CustomDropdown.svelte";
    import NumberInput from "$lib/comps/personalize-comp/NumberInput.svelte";
    import TextInput from "$lib/comps/personalize-comp/textInput.svelte";
    import { ExternalLink } from 'lucide-svelte';
@@ -10,6 +9,8 @@
    import { ThumbsUp } from 'lucide-svelte';
    import { ThumbsDown } from 'lucide-svelte';
    import { CalendarCog } from 'lucide-svelte';
+   import { apiRequest } from "../../tools/api-client";
+
 
 
    // save all data to this JS object pass into model.py
@@ -172,7 +173,6 @@
    }
 
 
-
   // Function to fetch professor rating from your Flask proxy endpoint
   async function fetchProfessorRating(professorName: string) {
    // api request to flask proxy endpoint
@@ -189,54 +189,25 @@
     }
   }
 
-  // save user schedule to data base 
-  async function sendSchedule(){
-      try {
-         isLoading = true;
-
-         const dataToSend = {
-            "schedule": userSchedule,
-            // dummy variable will actually add term later
-            "term_id": "Fall-24-25"
-         }
-
-         const response = await fetch("http://127.0.0.1:5000/auth/schedule-saver",
-            {
-               method: "POST",
-               headers: {
-                 "Content-Type": "application/json",
-               //   "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-              },
-              // always include cookies for Flask's login/session based authentication
-              credentials: "include",
-
-              //payload/data to send to flask endpoint
-              body: JSON.stringify(dataToSend)
-            }
-         )
-         if (!response.ok){
-            const errorText = await response.text()
-            console.error(`API Error Response: ${errorText}`)
-
-            userSchedule = []
-            throw new Error(`HTTP error. Status ${response.status}`)
-         }
-         
-         // if data was received successfully 
-         else if (response.ok){
-            const responseData = await response.json()
-         }
+async function saveSchedule() {
+   try {
+      const dataToSend = {
+         "schedule": userSchedule,
+         // dummy variable will actually add term later
+         "term_id": "Fall-24-25"
       }
 
-      // final error check
-      catch(error){
-         console.error(`Failed to even send data to flask. ${error}`)
-      }
+      const response = await apiRequest("auth/scheduler-saver", {
+         method: "POST",
+         body: JSON.stringify(dataToSend),
+      });
+      console.log("Schedule saved successfully", response)
 
-      finally {
-         isLoading = false;
-      }
    }
+   catch(error){
+      console.error("Couldn't access endpoint to save schedule", error);
+   }
+}
 
   
 
@@ -531,7 +502,7 @@
             <button class="glow bg-gradient-to-r
                from-sky-400 to-sky-500 text-stone-100 text-base
                px-4 py-2 rounded-3xl block m-auto mt-4 font-normal" 
-               onclick={sendSchedule}>
+               onclick={saveSchedule}>
                Save Schedule
             </button>
          </div>
