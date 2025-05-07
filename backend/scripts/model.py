@@ -10,15 +10,15 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import accuracy_score, classification_report
 
-# load_dotenv()
-# DATA_FILE = os.getenv("DATA_FILE")
+load_dotenv()
+DATA_FILE = os.getenv("DATA_FILE")
 # DATA_FILE = os.getenv("/scripts/course_data.json")
 
 # # Load the course data
-# with open(DATA_FILE, 'r') as f:
-#     courses = json.load(f)
+with open(DATA_FILE, 'r') as f:
+    data = json.load(f)
 
-data = pd.read_json('scripts/course_data.json')
+# data = pd.read_json('scripts/course_data.json')
 
 def fetchProfRating(professor_name):
     """

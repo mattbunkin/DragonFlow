@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { setAccessToken } from "../../../tools/token-service";
 
   // bind these values to input so once they're sent they're what user inputted
   let inputData = {
@@ -36,7 +37,8 @@
           const responseData = await response.json();
 
           // store access token
-          localStorage.setItem("access_token", responseData.user_access_token);
+          setAccessToken(responseData.user_access_token)
+
           
           // redirect user after making new account to prompt for important info
           await goto("/personalize-account")

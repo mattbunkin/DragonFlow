@@ -16,7 +16,8 @@ from flask_jwt_extended import (
     get_jwt, # full payload
     get_jwt_header, # header data
     get_jti, # very unique token identifier 
-    get_jwt_identity # get user_id from token (same as primary key for user from db)
+    get_jwt_identity,
+    create_access_token # get user_id from token (same as primary key for user from db)
 )
 import logging #will give us better errors printed in the console
 
@@ -41,8 +42,7 @@ with open(COURSE_DATA) as f:
 def load_user(pid):
     return User.query.get(int(pid)) #Converts the pid (primary_key) to an integer and fetches the user from the database
 
-
-# Registration route
+# Registration/sign up route
 @auth.route("/register", methods=["POST"])
 def register():
     """
@@ -53,11 +53,11 @@ def register():
     - dict of tokens with ids as the pid from the user schema/table; 
     redirects users to page where they could enter crucial student data
     """
-    
+
     # try getting the form data; could go wrong
     try:
         data = request.get_json()
-        
+
         username = data.get("username")
         password = data.get("password")
         drexel_email = data.get("email")
@@ -65,15 +65,15 @@ def register():
 
         if not username or not password or not drexel_email or not confirm_password:
             return jsonify({"msg": "Missing required fields"}), 400
-        
-        
+
         # Check if passwords match
         if password != confirm_password:
             logger.error("Passwords don't match")  # Log error for devs
-            return jsonify({"msg": "Passwords do not match"}), 400  # User-friendly message for client (display to frontend)
+            return (
+                jsonify({"msg": "Passwords do not match"}),
+                400,
+            )  # User-friendly message for client (display to frontend)
 
-        
-        
     except Exception as e:
         logger.error(f"Error in register route: {e}")
         return jsonify({"msg": "Invalid input form", "error": str(e)}), 400
@@ -83,18 +83,20 @@ def register():
         new_user = User(
             username=username,
             drexel_email=drexel_email,
-            hashed_password=generate_password_hash(password),  
+            hashed_password=generate_password_hash(password),
         )
 
         db.session.add(new_user)
         db.session.commit()
 
         # this will be sent to the frontend via dict struct: refer to tokens.py
-        user_tokens = tokens.gen_store_tokens(new_user.pid) # crucial as will make token identity same as primary keys
-        
+        user_tokens = tokens.gen_store_tokens(
+            new_user.pid
+        )  # crucial as will make token identity same as primary keys
+
         if user_tokens is None:
             db.session.rollback()
-            return jsonify({"msg": "error generating user tokens"}), 500 # server error
+            return jsonify({"msg": "error generating user tokens"}), 500  # server error
 
         return jsonify(user_tokens), 200
     
@@ -175,6 +177,20 @@ def logout():
         logger.error(f"Error in logout route: {e}")
         return jsonify({"msg": "Server error during logout", "error": str(e)}), 500
 
+
+@auth.route("/refresh-token", methods=["GET", "POST"])
+@jwt_required(refresh=True)
+def refresh_token():
+    """
+    ### Endpoint to refresh access token using valid refresh token
+    returns new access token with proper status code
+    """
+    current_user_id = get_jwt_identity()
+
+    # generate new access token
+    user_access_token = create_access_token(current_user_id)
+
+    return jsonify({"access_token": user_access_token}), 200
 
 # last endpoint in auth blueprint; get student's personalized details 
 @auth.route("/personalize-account", methods=["POST", "GET"])

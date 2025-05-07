@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { setAccessToken } from "../../../tools/token-service";
 
   // bind to input tag
   let inputData = { 
@@ -34,7 +35,7 @@
           const responseData = await response.json();
 
           // store access token
-          localStorage.setItem("access_token", responseData.user_access_token);
+          setAccessToken(responseData.user_access_token)
           
           // let user go to main scheduler/dashboard page
           await goto("/scheduler")

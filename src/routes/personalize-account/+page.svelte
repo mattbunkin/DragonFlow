@@ -5,6 +5,7 @@ import TextInput from '$lib/comps/personalize-comp/textInput.svelte';
 import NumberInput from '$lib/comps/personalize-comp/NumberInput.svelte';
 import CustomButton from '$lib/comps/home-comp/CustomButton.svelte';
 import { goto } from '$app/navigation';
+    import { apiRequest } from '../../tools/api-client';
 
 /* 
     Explanation of default data types:
@@ -42,47 +43,21 @@ let studentData = $state({
     time_preference: "",
 })
 
-// send student data; since student is logged-in must include authentication!
-async function sendStudentData(){
-    try {
-      // go to this endpoint to perform some operation
-      const response = await fetch("http://127.0.0.1:5000/auth/personalize-account",
-        {
-          // define operation we want to perform
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-          },
-          // always include cookies for Flask's session based authentication
-          credentials: "include",
 
-          // payload/data to send to endpoint 
-          body: JSON.stringify(studentData)
-        }
-      )
-      // if something we wrong fetching flask endpoint then show error
-      if (!response.ok){
-        throw new Error(`HTTP error. Status: ${response.status}`)
-      }
+async function saveStudentData() {
+  try {
+    // use api client to send data for authentication
+    const response = await apiRequest("auth/personalize-account", {
+      method: "POST",
+      body: JSON.stringify(studentData)
+    })
 
-      else if (response.ok){
-        const responseData = await response.json()
-
-        // store access token 
-        localStorage.setItem("access_token", responseData.user_access_token)
-
-        // redirect user to main scheduler 
-        await goto("/scheduler")
-      }
-
-    }
-    
-    // initial error catch for fetch; display error on browser console 
-    catch(error){
-      console.error(`Failed to fetch data from client: ${error}`)
-    }
-
+    console.log("Personalized account saved successfully", response)
+    await goto("/scheduler")
+  }
+  catch(error) {
+    console.error("Couldn't access the endpoint to personalize account", error)
+  }
 }
 
 </script>
@@ -285,7 +260,7 @@ async function sendStudentData(){
   <!-- Card containing all inputs ends here-->
   <CustomButton 
     buttonText={"Try Out Scheduler"}
-    buttonFunc={sendStudentData}
+    buttonFunc={saveStudentData}
   />
 
 
