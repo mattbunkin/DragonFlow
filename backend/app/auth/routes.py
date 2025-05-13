@@ -415,7 +415,7 @@ def get_interests():
         return jsonify({"error": "No data provided"}), 400
 
     # Get filter parameters with None as default if not provided
-    class_time = data.get("class_time")         # Expected: "Morning", "Afternoon", "Evening"
+    class_time = data.get("class_time")         # Expected: "Morning", "Afternoon", "Evening" or ["Morning", "Afternoon"]
     class_size = data.get("class_size")        # Expected: "Small", "Large"
     instruction_type = data.get("instruction_type")  # Expected: "Online", "In Person"
     preferred_course = data.get("course")  # Expected format: "CS172" or "UNIVCI101"
@@ -460,36 +460,66 @@ def get_interests():
                     # Extract the hour from start time (format "HH:MM")
                     start_hour = int(start_time.split(":")[0])
                     
-                    # Check against time categories
-                    if class_time == "Morning" and not (8 <= start_hour < 12):
+                    # Convert class_time to list if it's a single string
+                    time_filters = class_time if isinstance(class_time, list) else [class_time]
+                        
+                    # The course must match at least one of the specified time filters
+                    time_match = False
+                    
+                    for time_filter in time_filters:
+                        if time_filter == "Morning" and (8 <= start_hour < 12):
+                            time_match = True
+                            break
+                        elif time_filter == "Afternoon" and (12 <= start_hour < 16):
+                            time_match = True
+                            break
+                        elif time_filter == "Evening" and (16 <= start_hour <= 22):
+                            time_match = True
+                            break
+                    
+                    # If none of the time filters matched, exclude the course
+                    if not time_match:
                         match = False
-                    elif class_time == "Afternoon" and not (12 <= start_hour < 16):
-                        match = False
-                    elif class_time == "Evening" and not (16 <= start_hour <= 22):
-                        match = False
+                        
                 except (ValueError, AttributeError):
                     match = False # Handle invalid time format or missing data
         
         # --------------------- CLASS SIZE FILTER ---------------------
         # Only check size if previous filters haven't disqualified the course
         if match and class_size:
-            size = course.get('max_enroll')
+            enrollment = course.get('max_enroll')
             
-            if not size:  # No enrollment data available
+            if not enrollment:  # No enrollment data available
                 match = False
             else:
                 try:
-                    size = int(size)  # Convert to integer
+                    enrollment = int(enrollment)  # Convert to integer
                     
-                    # Apply size thresholds
-                    if class_size == "Large" and size <= 50:
-                        match = False  # Not large enough
-                    elif class_size == "Small" and size > 50:
-                        match = False  # Too large
+                    # Convert class_size to list if it's a single string
+                    if isinstance(class_size, list):
+                        size_filters = class_size
+                    else:
+                        size_filters = [class_size]
+                    
+                    # The course must match at least one of the specified size filters
+                    size_match = False
+                    
+                    for size_filter in size_filters:
+                        if size_filter == "Large" and enrollment > 50:
+                            size_match = True
+                            break
+                        elif size_filter == "Small" and enrollment <= 50:
+                            size_match = True
+                            break
+                    
+                    # If none of the size filters matched, exclude the course
+                    if not size_match:
+                        match = False
+                        
                 except ValueError:
                     # Handle invalid size data
                     match = False
-        
+                    
         # --------------------- INSTRUCTION TYPE FILTER ---------------------
         if match and instruction_type:
             # Normalize strings for case-insensitive comparison
@@ -506,7 +536,7 @@ def get_interests():
         if match:
             matching_crns.append(int(crn))
     
-     # Check if we found any matching courses
+    # Check if we found any matching courses
     if not matching_crns:
         return jsonify({
             "msg": "No courses match the selected filters.",
