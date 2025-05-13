@@ -337,7 +337,7 @@ def get_course_crn(course_name: str, find_all=False) -> int:
     
 
 
-def get_crns_info(crns: list) -> list[dict]:
+def get_crns_info(crns: list[int]) -> list[dict]:
     """
     ### find each json data object associated with each entry of list and store in list pd dictionaries
     - loops through file full of data

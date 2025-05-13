@@ -10,7 +10,11 @@
    import { ThumbsDown } from 'lucide-svelte';
    import { CalendarCog } from 'lucide-svelte';
    import { apiRequest } from "../../tools/api-client";
-
+   import CustomDropdown from "$lib/comps/algo-comp/CustomDropdown.svelte";
+   import CheckboxDropDown from "$lib/comps/algo-comp/CheckboxDropDown.svelte";
+ 
+   // track whether we want user to apply filters
+   let isFiltered = $state(false);
 
 
    // save all data to this JS object pass into model.py
@@ -54,12 +58,25 @@
        course: ""
    };
 
-   // interests input
-   let interests = {
-      class_time: ["early", "afternoon", "evening"],
-      class_size: 0,
-      class_difficulty: 0,
-      instruction_type : ["online", "in_person"],
+   let selectedClassTimes: string[] = $state([]);
+   let selectedClassSizes: string[] = $state([]);
+
+   // defaulting the instruction type to always be in-person
+   let selectedClassType: string = $state("In Person")
+
+
+   // Update your hasActiveFilters function to check if any filters are applied
+   function hasActiveFilters(): boolean {
+      // Check if any class times are selected
+      if (selectedClassTimes.length > 0) return true;
+      
+      // Check if any class sizes are selected
+      if (selectedClassSizes.length > 0) return true;
+      
+      // Check if instruction type is selected and not default
+      if (selectedClassType && selectedClassType !== "In Person") return true;
+      
+      return false;
    }
 
    // store response data from API
@@ -96,7 +113,6 @@
       }
    }
 
-
    // helper function transform military time to regular time
    function militaryToRegular(militaryTime: string): string {
       const [hours, minutes] = militaryTime.split(':').map(Number);
@@ -108,45 +124,68 @@
       return `${regularHours}:${formattedMinutes} ${period}`;
    }
 
-
    // send course data to scheduler endpoint
    async function sendCourseData(){
      try {
       isLoading = true;
+      isFiltered = hasActiveFilters()
 
       // ensure all types of data is correct
-      const dataToSend = {
+      const baseData = {
          // ensure gpa is a number type
          gpa: Number(courseData.gpa), 
 
          // remove any whitespace and turn all letters upper case
-         course: (courseData.course.trim()).toUpperCase() 
+         course: (courseData.course.trim()).toUpperCase(),
+
       };
 
+      // determine which endpoint to use based off true or falsehood of filters
+      const endpoint = isFiltered ? 
+            "http://127.0.0.1:5000/auth/get-interests" : 
+            "http://127.0.0.1:5000/auth/course-retriever";
+      
 
-        const response = await fetch("http://127.0.0.1:5000/auth/course-retriever",
-           {
-              method: "POST",
-              headers: {
-                 "Content-Type": "application/json",
-               //   "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-              },
-              // always include cookies for Flask's login/session based authentication
-              credentials: "include",
+      // determine how much data we're sending 
+       const dataToSend = isFiltered ? 
+         {
+         ...baseData,
+         // SENDING FIRST ITEM UNTIL API ACCEPTS LIST VALUES (will later be implemented..)
 
-              //payload/data to send to flask endpoint
-              body: JSON.stringify(dataToSend)
-           }
-        )
-        // display error here later to user
-        if (!response.ok){
-            const errorText = await response.text();
-            console.error("API Error Response:", errorText);
+         // Send array containing first item (for class_time)
+         class_time: selectedClassTimes.length > 0 ? selectedClassTimes[0] : null,
+         // Send array containing first item (for class_size)
+         class_size: selectedClassSizes.length > 0 ? selectedClassSizes[0] : null,
+         // Send instruction type (if selected)
+         instruction_type: selectedClassType !== "In Person" ? selectedClassType : null,
+         } : 
+      baseData;
 
-            // make empty list if error
-            courseSlots = []
-            throw new Error(`HTTP error. Status ${response.status}`);
-        }
+      console.log("data we are sending", dataToSend)
+
+      const response = await fetch(endpoint,
+         {
+            method: "POST",
+            headers: {
+               "Content-Type": "application/json",
+            //   "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+            },
+            // always include cookies for Flask's login/session based authentication
+            credentials: "include",
+
+            //payload/data to send to flask endpoint
+            body: JSON.stringify(dataToSend)
+         }
+      )
+      // display error here later to user
+      if (!response.ok){
+         const errorText = await response.text();
+         console.error("API Error Response:", errorText);
+
+         // make empty list if error
+         courseSlots = []
+         throw new Error(`HTTP error. Status ${response.status}`);
+      }
       
       // if the data was received successfully 
       else if (response.ok){
@@ -189,6 +228,7 @@
     }
   }
 
+// use api client to save schedule because access token is needed
 async function saveSchedule() {
    try {
       const dataToSend = {
@@ -262,11 +302,15 @@ async function saveSchedule() {
         <button 
          onclick={sendCourseData}
          disabled={isLoading}
+         class={isFiltered ? "relative" : ""}
         >
         {#if isLoading}
             <span class="animate-pulse ml-2 text-center">Loading...</span>
          {:else}
            <Search class="mb-7 ml-5"/>
+            {#if isFiltered}
+               <div class="absolute -top-2 -right-2 w-3 h-3 bg-blue-500 rounded-full"></div>
+            {/if}
          {/if}
          </button>
       </div>
@@ -520,7 +564,46 @@ async function saveSchedule() {
 
     <!-- Recommendation section -->
     <div class="rounded-lg shadow-md shadow-stone-200 p-6">
-       <h1>Input Your Interests</h1>
+
+      <h1 class="font-semibold text-lg">
+        Input Your Interests
+      </h1>
+      <hr class="straight-line w-90 mx-auto my-2 bg-gray-200 border-0 md:my-2 dark:bg-zinc-900">
+      <p class="text-black text-opacity-75 text-sm p-1">
+         Everyone has different preferences, our algorithms account for that. 
+         Whether you'd like to filter classes to be at a specific time frame or
+         with a specific class size, we've got you covered. Simply click the search
+         button again after you've applied your filters.
+      </p>
+      
+      <!-- Dropdowns that allow user to select preferences/filters for course selection-->
+      <div class="flex flex-row justify-between mt-2">
+         <CheckboxDropDown 
+         dropDownHeader="Class Time"
+         dropDownSubHeader="Choose class time"
+         dropDownOptions={["Morning", "Afternoon", "Evening"]}
+         styling="rounded-sm"
+         bind:selected={selectedClassTimes}
+         />
+
+         <CheckboxDropDown 
+         dropDownHeader="Class Size"
+         dropDownSubHeader="Choose Class Size"
+         dropDownOptions={["Small", "Large"]}
+         styling="rounded-sm"
+         bind:selected={selectedClassSizes}
+         />
+
+         <CustomDropdown 
+         dropDownHeader="Instruction Type"
+         dropDownSubHeader="Can Only Select One"
+         dropDownOptions={["In-Person", "Online"]}
+         styling="rounded-sm"
+         bind:selected={selectedClassType}
+         />
+      </div>
+
+      
     </div>
    </div>
 

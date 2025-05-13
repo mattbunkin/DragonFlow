@@ -417,9 +417,9 @@ def get_interests():
     # Get filter parameters with None as default if not provided
     class_time = data.get("class_time")         # Expected: "Morning", "Afternoon", "Evening"
     class_size = data.get("class_size")        # Expected: "Small", "Large"
-    class_difficulty = data.get("class_difficulty")  # Placeholder for future use (RMP)
     instruction_type = data.get("instruction_type")  # Expected: "Online", "In Person"
-    preferred_course = data.get("preferred_course")  # Expected format: "CS172" or "UNIVCI101"
+    preferred_course = data.get("course")  # Expected format: "CS172" or "UNIVCI101"
+    gpa = data.get("gpa")
 
     subject_match = course_number_match = None
     
@@ -502,20 +502,57 @@ def get_interests():
             elif requested_type == "in person" and instruction_method != "face to face":
                 match = False
         
-        # --------------------- CLASS DIFFICULTY (PLACEHOLDER) ---------------------
-        if match and class_difficulty:
-            # Future implementation point for difficulty filtering
-            pass  # Currently does nothing
-
-        # If all active filters were passed, add to results
+        # finally match all of our criteria then append crn to our list
         if match:
-            matching_crns.append(crn)  # Store the matching course's CRN
-            
-    # Return matching CRNs as JSON response
-    return jsonify({
-        "matching_courses": matching_crns,
-        "count": len(matching_crns) #include count of course matches (maybe useful for frontend)
-    })
+            matching_crns.append(int(crn))
+    
+     # Check if we found any matching courses
+    if not matching_crns:
+        return jsonify({
+            "msg": "No courses match the selected filters.",
+            "course_data": [],
+            "probability_score": 0
+        }), 200  # return an empty result rather than an error
+        
+
+        # --------------------- CLASS DIFFICULTY (PLACEHOLDER) ---------------------
+        # to be implemented soon
+    
+
+    # --------------------- SEND FILTERED COURSES TO SVELTE LOGIC -------------------
+    # copy exact same logic as course_retriever except now we have filtered crns 
+    try:
+        # get one course's entire CRN for the quarter 
+        course_info = prereqs.get_crns_info(matching_crns)
+        
+        # get model to calculate probability 
+        try:
+            gpa = float(gpa)
+            course_crn = str(matching_crns[0])
+
+            # random probability for certain course (if user
+            # applies filters with no course search) but can be ignored for now..
+            probability = model.predict_success_probability(gpa, course_crn)
+            # return list of dicts back to frontend
+            return jsonify({
+                "course_data": course_info,
+                "probability_score": int(probability * 100)
+            }), 200
+
+        # error if type or crn is not found
+        except ValueError as e:
+            return jsonify({
+                "msg": "enter valid crn or gpa types",
+                "error": str(e),
+            }), 400
+
+    # return error shown from scripts if not able to look up any of these
+    except LookupError as e:
+        return jsonify({
+            "msg": "Could not find course in course data.",
+            "error": str(e)
+        }), 400
+
 
 @auth.route("/schedule-saver", methods=["GET", "POST"])
 @jwt_required()

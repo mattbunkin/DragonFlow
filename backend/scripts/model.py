@@ -40,7 +40,7 @@ def fetchProfRating(professor_name):
     
     #throws an error if the script fails to run or if the output is not valid JSON
     except Exception as e:
-        print(f"Error fetching RMP rating: {e}")
+        # print(f"Error fetching RMP rating: {e}")
         return None
 
 # Feature extraction functions

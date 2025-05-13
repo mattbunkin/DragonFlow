@@ -32,7 +32,7 @@
      <DropdownMenu.Group>
       <DropdownMenu.GroupHeading>{dropDownSubHeader}</DropdownMenu.GroupHeading>
       <DropdownMenu.Separator />
-      <DropdownMenu.RadioGroup bind:value={position}>
+      <DropdownMenu.RadioGroup bind:value={selected}>
         {#each dropDownOptions as option}
             <!-- svelte-ignore attribute_quoted -->
             <DropdownMenu.RadioItem 
